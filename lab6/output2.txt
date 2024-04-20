@@ -1,0 +1,12 @@
+Finished Parsing
+
+
+Function  INT main 
+ Compund Statement 
+  Expression STATEMENT 
+   VARIABLE x
+    [
+     EXPRESSION operator PLUS
+      NUMBER value 3 
+      NUMBER value 5 
+    ]

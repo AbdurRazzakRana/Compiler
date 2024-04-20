@@ -1,0 +1,12 @@
+
+Finished Parsing
+
+
+Function INT main
+ Compound Statement
+  Variable INT x[100]
+  Expression STATEMENT
+   VARIABLE x
+    [
+     NUMBER value 3
+    ]

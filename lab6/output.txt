@@ -1,0 +1,136 @@
+
+Finished Parsing
+
+
+Function INT main
+ Parameter INT x
+ Parameter VOID y[]
+ Compound Statement
+  Write Expression
+   NUMBER value 1
+  Write String "hello"
+  IF STATEMENT
+   IF expression
+    EXPRESSION operator !=
+     VARIABLE x
+     VARIABLE y
+      [
+       NUMBER value 2
+      ]
+   IF body
+    READ STATEMENT
+     VARIABLE z
+  IF STATEMENT
+   IF expression
+    EXPRESSION operator ==
+     EXPRESSION operator Unary-minus
+      VARIABLE x
+     VARIABLE y
+      [
+       NUMBER value 2
+      ]
+   IF body
+    READ STATEMENT
+     VARIABLE z
+   ELSE body
+    Write Expression
+     EXPRESSION operator PLUS
+      NUMBER value 3
+      NUMBER value 5
+  Expression STATEMENT
+   CALL STATEMENT function a
+    (
+     CALL argument
+      VARIABLE a
+     CALL argument
+      VARIABLE b
+       [
+        NUMBER value 3
+       ]
+     CALL argument
+      CALL STATEMENT function f
+       (
+        CALL argument
+         VARIABLE x
+       )
+    )
+  Expression STATEMENT
+  Expression STATEMENT
+  Expression STATEMENT
+  WHILE STATEMENT
+   WHILE expression
+    EXPRESSION operator ==
+     EXPRESSION operator TIMES
+      NUMBER value 17
+      NUMBER value 8
+     EXPRESSION operator %
+      NUMBER value 2
+      NUMBER value 9
+   WHILE body
+    Compound Statement
+     Variable INT x
+     Variable INT y[100]
+     Variable VOID a
+     Variable VOID b
+     ASSIGNMENT STATEMENT
+      VARIABLE x
+     is assigned
+      EXPRESSION operator /
+       VARIABLE x
+       NUMBER value 1
+Variable INT z
+Function VOID f
+ Compound Statement
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator PLUS
+    EXPRESSION operator MINUS
+     NUMBER value 1
+     NUMBER value 2
+    EXPRESSION operator %
+     EXPRESSION operator /
+      EXPRESSION operator TIMES
+       VARIABLE x
+       NUMBER value 2
+      VARIABLE x
+       [
+        NUMBER value 3
+       ]
+     NUMBER value 12
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator <
+    NUMBER value 1
+    NUMBER value 2
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator >
+    NUMBER value 1
+    NUMBER value 2
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator >=
+    NUMBER value 1
+    NUMBER value 2
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator <=
+    NUMBER value 1
+    NUMBER value 2
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator ==
+    NUMBER value 1
+    NUMBER value 2
+  ASSIGNMENT STATEMENT
+   VARIABLE x
+  is assigned
+   EXPRESSION operator !=
+    NUMBER value 1
+    NUMBER value 2
