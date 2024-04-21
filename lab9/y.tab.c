@@ -524,8 +524,8 @@ static const yytype_uint16 yyrline[] =
      411,   419,   427,   444,   456,   460,   470,   481,   486,   498,
      522,   543,   582,   590,   591,   615,   616,   617,   618,   619,
      620,   628,   629,   652,   653,   660,   661,   684,   685,   686,
-     693,   694,   700,   701,   702,   718,   758,   759,   767,   778,
-     796,   800
+     693,   694,   700,   701,   702,   718,   758,   759,   767,   780,
+     800,   804
 };
 #endif
 
@@ -2258,14 +2258,16 @@ yyreduce:
 					(yyval.node)->my_data_type = (yyvsp[(1) - (1)].node)->my_data_type;
 					
 					(yyval.node)->name = CreateTemp();
-					(yyval.node)->symbol = Insert((yyval.node)->name, (yyvsp[(1) - (1)].node)->my_data_type, (yyvsp[(1) - (1)].node)->symbol->SubType, LEVEL, 1, OFFSET); // final sub type will be whatever got from the expression
-					(yyval.node)->symbol->SubType = (yyvsp[(1) - (1)].node)->symbol->SubType; // just to make sure type
+					// insert with subtype
+					// if subtype does not have such as T_NUM, insert scaler
+					enum SYMBOL_SUBTYPE subType = (yyvsp[(1) - (1)].node)->symbol != NULL ? (yyvsp[(1) - (1)].node)->symbol->SubType : SYM_SCALAR;
+					(yyval.node)->symbol = Insert((yyval.node)->name, (yyvsp[(1) - (1)].node)->my_data_type, subType, LEVEL, 1, OFFSET); // final sub type will be whatever got from the expression
 					OFFSET = OFFSET + 1;
 				}
     break;
 
   case 79:
-#line 779 "lab9.y"
+#line 781 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2273,21 +2275,23 @@ yyreduce:
 					(yyval.node)->my_data_type = (yyvsp[(1) - (3)].node)->my_data_type;
 
 					(yyval.node)->name = CreateTemp();
-					(yyval.node)->symbol = Insert((yyval.node)->name, (yyvsp[(1) - (3)].node)->my_data_type, (yyvsp[(1) - (3)].node)->symbol->SubType, LEVEL, 1, OFFSET);// final sub type is form the expression 
-					(yyval.node)->symbol->SubType = (yyvsp[(1) - (3)].node)->symbol->SubType;
+					// insert with subtype
+					// if subtype does not have such as T_NUM, insert scaler
+					enum SYMBOL_SUBTYPE subType = (yyvsp[(1) - (3)].node)->symbol != NULL ? (yyvsp[(1) - (3)].node)->symbol->SubType : SYM_SCALAR;
+					(yyval.node)->symbol = Insert((yyval.node)->name, (yyvsp[(1) - (3)].node)->my_data_type, subType, LEVEL, 1, OFFSET);// final sub type is form the expression 
 					OFFSET = OFFSET + 1;
 				}
     break;
 
   case 80:
-#line 797 "lab9.y"
+#line 801 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_BREAK);
 				}
     break;
 
   case 81:
-#line 801 "lab9.y"
+#line 805 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_CONTINUE);
 				}
@@ -2295,7 +2299,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2299 "y.tab.c"
+#line 2303 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2509,7 +2513,7 @@ yyreturn:
 }
 
 
-#line 805 "lab9.y"
+#line 809 "lab9.y"
 	/* end of rules, start of program */
 
 int main()

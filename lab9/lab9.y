@@ -771,8 +771,10 @@ Arg_List : Expression
 					$$->my_data_type = $1->my_data_type;
 					
 					$$->name = CreateTemp();
-					$$->symbol = Insert($$->name, $1->my_data_type, $1->symbol->SubType, LEVEL, 1, OFFSET); // final sub type will be whatever got from the expression
-					$$->symbol->SubType = $1->symbol->SubType; // just to make sure type
+					// insert with subtype
+					// if subtype does not have such as T_NUM, insert scaler
+					enum SYMBOL_SUBTYPE subType = $1->symbol != NULL ? $1->symbol->SubType : SYM_SCALAR;
+					$$->symbol = Insert($$->name, $1->my_data_type, subType, LEVEL, 1, OFFSET); // final sub type will be whatever got from the expression
 					OFFSET = OFFSET + 1;
 				}
 	| Expression ',' Arg_List 
@@ -783,8 +785,10 @@ Arg_List : Expression
 					$$->my_data_type = $1->my_data_type;
 
 					$$->name = CreateTemp();
-					$$->symbol = Insert($$->name, $1->my_data_type, $1->symbol->SubType, LEVEL, 1, OFFSET);// final sub type is form the expression 
-					$$->symbol->SubType = $1->symbol->SubType;
+					// insert with subtype
+					// if subtype does not have such as T_NUM, insert scaler
+					enum SYMBOL_SUBTYPE subType = $1->symbol != NULL ? $1->symbol->SubType : SYM_SCALAR;
+					$$->symbol = Insert($$->name, $1->my_data_type, subType, LEVEL, 1, OFFSET);// final sub type is form the expression 
 					OFFSET = OFFSET + 1;
 				}
 	;
