@@ -135,8 +135,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "symtable.h"
+#include "prototype.h"
 
 ASTnode *PROGRAM;
 // prototying yylex to get ride of compilation waring
@@ -151,6 +153,8 @@ int LEVEL = 0;  // global context variable to know how depth we are
 int OFFSET = 0; // global variable to accumulate required runtime space
 int GOFFSET = 0; // global variable to accumulate global variable offset
 int maxoffset = 0;  // the largest offset needed of the current function
+int proto_funcCounter=0; // function prototype counter; increases when prototype found, 
+		//decereases when a progotyped functions has declaration
 
 // when error occurs, it prints the line number
 void yyerror (char *s)  /* Called by yyparse on error */
@@ -181,7 +185,7 @@ void yyerror (char *s)  /* Called by yyparse on error */
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 53 "lab9.y"
+#line 57 "lab9.y"
 {
 	int value;
 	char * string;
@@ -190,7 +194,7 @@ typedef union YYSTYPE
 	enum AST_OPERATORS operators;
 }
 /* Line 193 of yacc.c.  */
-#line 194 "y.tab.c"
+#line 198 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -203,7 +207,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 207 "y.tab.c"
+#line 211 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -517,15 +521,15 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   107,   107,   118,   119,   129,   130,   139,   174,   179,
-     185,   191,   204,   205,   212,   226,   245,   244,   275,   276,
-     282,   283,   295,   315,   341,   341,   364,   369,   378,   383,
-     390,   391,   392,   393,   394,   395,   396,   397,   398,   405,
-     411,   419,   427,   444,   456,   460,   470,   481,   486,   498,
-     546,   567,   606,   614,   615,   661,   662,   663,   664,   665,
-     666,   674,   675,   721,   722,   729,   730,   753,   754,   755,
-     762,   763,   769,   770,   771,   789,   829,   830,   838,   851,
-     871,   875
+       0,   111,   111,   122,   123,   133,   134,   143,   178,   183,
+     189,   195,   208,   209,   216,   241,   268,   267,   308,   309,
+     315,   316,   328,   348,   374,   374,   397,   402,   411,   416,
+     423,   424,   425,   426,   427,   428,   429,   430,   431,   438,
+     444,   452,   460,   477,   489,   493,   503,   514,   519,   531,
+     579,   600,   639,   647,   648,   694,   695,   696,   697,   698,
+     699,   707,   708,   754,   755,   762,   763,   786,   787,   788,
+     795,   796,   802,   803,   804,   822,   868,   869,   877,   890,
+     910,   914
 };
 #endif
 
@@ -1523,17 +1527,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 107 "lab9.y"
+#line 111 "lab9.y"
     {PROGRAM = (yyvsp[(1) - (1)].node);}
     break;
 
   case 3:
-#line 118 "lab9.y"
+#line 122 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 4:
-#line 119 "lab9.y"
+#line 123 "lab9.y"
     {
 		(yyval.node) = (yyvsp[(1) - (2)].node);
 		(yyval.node) -> next= (yyvsp[(2) - (2)].node);
@@ -1541,17 +1545,17 @@ yyreduce:
     break;
 
   case 5:
-#line 129 "lab9.y"
+#line 133 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 6:
-#line 130 "lab9.y"
+#line 134 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 7:
-#line 140 "lab9.y"
+#line 144 "lab9.y"
     {
 					// populate the s1 connected list with the defined type via $1;
 					ASTnode *p = (yyvsp[(2) - (3)].node);
@@ -1582,7 +1586,7 @@ yyreduce:
     break;
 
   case 8:
-#line 175 "lab9.y"
+#line 179 "lab9.y"
     { 
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (1)].string);
@@ -1590,7 +1594,7 @@ yyreduce:
     break;
 
   case 9:
-#line 180 "lab9.y"
+#line 184 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (4)].string);
@@ -1599,7 +1603,7 @@ yyreduce:
     break;
 
   case 10:
-#line 186 "lab9.y"
+#line 190 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (3)].string);
@@ -1608,7 +1612,7 @@ yyreduce:
     break;
 
   case 11:
-#line 192 "lab9.y"
+#line 196 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (6)].string);
@@ -1618,17 +1622,17 @@ yyreduce:
     break;
 
   case 12:
-#line 204 "lab9.y"
+#line 208 "lab9.y"
     {(yyval.d_type) = A_INTTYPE;}
     break;
 
   case 13:
-#line 205 "lab9.y"
+#line 209 "lab9.y"
     {(yyval.d_type) = A_VOIDTYPE;}
     break;
 
   case 14:
-#line 213 "lab9.y"
+#line 217 "lab9.y"
     { 
 					// function declaration with compound statement
 					(yyval.node) = ASTCreateNode(A_FUNCTIONDEC);
@@ -1639,14 +1643,30 @@ yyreduce:
 					(yyval.node)->symbol = Search((yyvsp[(1) - (2)].node)->name, LEVEL, 0);
 					(yyval.node)->symbol->offset = maxoffset;  // setting max offset as the offset for the function
 
+					struct Func_Prototype * fp = Search_Proto((yyval.node)->name);
+					if(fp != NULL){
+						if(fp->value != -1){ // just a safe chacking if a prototyped function is implemented but still in prototype in list
+							yyerror((yyval.node)->name);
+							yyerror("Prototyping error");
+							exit(1);
+						}
+						Delete_Proto(fp); // As the protytpe has a declaration, no need to keep in prototype list anymore
+						proto_funcCounter--; // decreasing counter as one prototype has declaration
+					}
+
 					// During walkout from the function, set back the counters for global varaibles
 					OFFSET = GOFFSET;
 				}
     break;
 
   case 15:
-#line 227 "lab9.y"
+#line 242 "lab9.y"
     {// Grad Student function prototyping case.
+					if(Search_Proto((yyvsp[(1) - (2)].node)->name) != NULL){ // if there is the prototype of same funciton written again, barf
+						yyerror((yyvsp[(1) - (2)].node)->name);
+						yyerror("attemping to prototyping twice on same funciton");
+						exit(1);
+					}
 					(yyval.node) = ASTCreateNode(A_FUNCTION_PROTO);
 					(yyval.node)->my_data_type = (yyvsp[(1) - (2)].node)->my_data_type;  //function type is described at Grad_Fun_Common_Part
 					(yyval.node)->name = (yyvsp[(1) - (2)].node)->name; // same as previous
@@ -1655,22 +1675,28 @@ yyreduce:
 					(yyval.node)->symbol = Search((yyvsp[(1) - (2)].node)->name, LEVEL, 0);
 					(yyval.node)->symbol->offset = maxoffset;  // setting max offset as the offset for the function
 
+					Insert_Proto((yyvsp[(1) - (2)].node)->name, LEVEL, -1); // inserting into the prototype table
+					proto_funcCounter++;	// increasing the prototype counter
+					
 					// Even though we are not going into the function for prototyping case
 					OFFSET = GOFFSET;
 				}
     break;
 
   case 16:
-#line 245 "lab9.y"
+#line 268 "lab9.y"
     {
-					if (Search((yyvsp[(2) - (2)].string), LEVEL, 0) != NULL) { // check if the function has been defined before
+					// added Search_Proto checking, if a function was prototyped earlieer,
+					// we need to allow this case for delcaration purpose
+					if (Search((yyvsp[(2) - (2)].string), LEVEL, 0) != NULL && Search_Proto((yyvsp[(2) - (2)].string)) == NULL) { // check if the function has been defined before
 						yyerror((yyvsp[(2) - (2)].string));  // T_ID has alredy been used, should barf
 						yyerror("function name already in use");
 						exit(1);
 					}
 
-					// not in sym table, should be inserted
-					Insert((yyvsp[(2) - (2)].string), (yyvsp[(1) - (2)].d_type), SYM_FUNCTION, LEVEL, 0, 0);
+					// only insert if its not in symbol table
+					if(Search((yyvsp[(2) - (2)].string), LEVEL, 0) == NULL)
+						Insert((yyvsp[(2) - (2)].string), (yyvsp[(1) - (2)].d_type), SYM_FUNCTION, LEVEL, 0, 0);
 
 					// At the time of walkin to the function resettting counters
 					/*while chekcing assignment testcases, setting offset = 0 will match the outputs
@@ -1683,9 +1709,16 @@ yyreduce:
     break;
 
   case 17:
-#line 264 "lab9.y"
+#line 290 "lab9.y"
     {
-					Search((yyvsp[(2) - (6)].string), LEVEL, 0) -> fparms = (yyvsp[(5) - (6)].node);  // setting pointer to the function parameters 
+					struct SymbTab *p = Search((yyvsp[(2) - (6)].string), LEVEL, 0);
+					// if not delcared earier or declared but prototyped shoudl pass
+					if (Search_Proto((yyvsp[(2) - (6)].string)) != NULL && check_params(p->fparms, (yyvsp[(5) - (6)].node))==0){ 
+						// previously declared prototype and current actuals does not match
+						yyerror("Parameter mismatch: Prototype formals and declaration actuals ");
+						exit(1);
+					}
+					p-> fparms = (yyvsp[(5) - (6)].node);  // setting pointer to the function parameters 
 
 					(yyval.node) = ASTCreateNode(A_FUNCTION_COMMON); // setting up name, type and s1 for both prototype and func dec
 					(yyval.node)->my_data_type = (yyvsp[(1) - (6)].d_type);
@@ -1695,22 +1728,22 @@ yyreduce:
     break;
 
   case 18:
-#line 275 "lab9.y"
+#line 308 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 19:
-#line 276 "lab9.y"
+#line 309 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 20:
-#line 282 "lab9.y"
+#line 315 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 21:
-#line 284 "lab9.y"
+#line 317 "lab9.y"
     {
 					(yyval.node) = (yyvsp[(1) - (3)].node);
 					(yyval.node)->next = (yyvsp[(3) - (3)].node);
@@ -1718,7 +1751,7 @@ yyreduce:
     break;
 
   case 22:
-#line 296 "lab9.y"
+#line 329 "lab9.y"
     {
 					// check if name is already used
 					// level+1 because varaibles in parameters will be used as child level inside function
@@ -1741,7 +1774,7 @@ yyreduce:
     break;
 
   case 23:
-#line 316 "lab9.y"
+#line 349 "lab9.y"
     {
 					// check if name is already used
 					// level+1 because varaibles in parameters will be used as child level inside function
@@ -1763,12 +1796,12 @@ yyreduce:
     break;
 
   case 24:
-#line 341 "lab9.y"
+#line 374 "lab9.y"
     {LEVEL++;}
     break;
 
   case 25:
-#line 342 "lab9.y"
+#line 375 "lab9.y"
     {
 					// Before walkin to the function, level +1
 					(yyval.node) = ASTCreateNode(A_COMPOUND);
@@ -1787,7 +1820,7 @@ yyreduce:
     break;
 
   case 26:
-#line 365 "lab9.y"
+#line 398 "lab9.y"
     {
 					(yyval.node) = (yyvsp[(1) - (2)].node);
 					(yyval.node)->next = (yyvsp[(2) - (2)].node);
@@ -1795,12 +1828,12 @@ yyreduce:
     break;
 
   case 27:
-#line 369 "lab9.y"
+#line 402 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 28:
-#line 379 "lab9.y"
+#line 412 "lab9.y"
     {
 					(yyval.node) = (yyvsp[(1) - (2)].node);
 					(yyval.node)->next = (yyvsp[(2) - (2)].node);
@@ -1808,57 +1841,57 @@ yyreduce:
     break;
 
   case 29:
-#line 383 "lab9.y"
+#line 416 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 30:
-#line 390 "lab9.y"
+#line 423 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 31:
-#line 391 "lab9.y"
+#line 424 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 32:
-#line 392 "lab9.y"
+#line 425 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 33:
-#line 393 "lab9.y"
+#line 426 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 34:
-#line 394 "lab9.y"
+#line 427 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 35:
-#line 395 "lab9.y"
+#line 428 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 36:
-#line 396 "lab9.y"
+#line 429 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 37:
-#line 397 "lab9.y"
+#line 430 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 38:
-#line 398 "lab9.y"
+#line 431 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 39:
-#line 406 "lab9.y"
+#line 439 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_EXPR_STAT);
 					(yyval.node)->s1 = (yyvsp[(1) - (2)].node);
@@ -1866,12 +1899,12 @@ yyreduce:
     break;
 
   case 40:
-#line 411 "lab9.y"
+#line 444 "lab9.y"
     {(yyval.node) = ASTCreateNode(A_EXPR_STAT);}
     break;
 
   case 41:
-#line 420 "lab9.y"
+#line 453 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_IF); 
 					(yyval.node)->s1 = (yyvsp[(3) - (5)].node);
@@ -1882,7 +1915,7 @@ yyreduce:
     break;
 
   case 42:
-#line 428 "lab9.y"
+#line 461 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_IF);    
 					(yyval.node)->s1 = (yyvsp[(3) - (7)].node);	// setting expression to the first child of IF Condition
@@ -1894,7 +1927,7 @@ yyreduce:
     break;
 
   case 43:
-#line 445 "lab9.y"
+#line 478 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_WHILE_STAT);
 					(yyval.node)->s1 = (yyvsp[(3) - (5)].node);
@@ -1903,14 +1936,14 @@ yyreduce:
     break;
 
   case 44:
-#line 457 "lab9.y"
+#line 490 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_RETURN_STAT);
 				}
     break;
 
   case 45:
-#line 461 "lab9.y"
+#line 494 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_RETURN_STAT);
 					(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1918,7 +1951,7 @@ yyreduce:
     break;
 
   case 46:
-#line 471 "lab9.y"
+#line 504 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_READ);
 					(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1926,7 +1959,7 @@ yyreduce:
     break;
 
   case 47:
-#line 482 "lab9.y"
+#line 515 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_WRITE);
 					(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1934,7 +1967,7 @@ yyreduce:
     break;
 
   case 48:
-#line 487 "lab9.y"
+#line 520 "lab9.y"
     {	
 					(yyval.node) = ASTCreateNode(A_WRITE);
 					(yyval.node)->name = (yyvsp[(2) - (3)].string);
@@ -1942,7 +1975,7 @@ yyreduce:
     break;
 
   case 49:
-#line 499 "lab9.y"
+#line 532 "lab9.y"
     {
 
 					if((yyvsp[(1) - (4)].node)->my_data_type != (yyvsp[(3) - (4)].node)->my_data_type){
@@ -1987,7 +2020,7 @@ yyreduce:
     break;
 
   case 50:
-#line 547 "lab9.y"
+#line 580 "lab9.y"
     {
 					struct SymbTab *p = Search ((yyvsp[(1) - (1)].string), LEVEL, 	1);
 					if (p == NULL) {
@@ -2011,7 +2044,7 @@ yyreduce:
     break;
 
   case 51:
-#line 568 "lab9.y"
+#line 601 "lab9.y"
     {
 					struct SymbTab *p = Search ((yyvsp[(1) - (4)].string), LEVEL,	1);
 					if (p == NULL) {
@@ -2049,17 +2082,17 @@ yyreduce:
     break;
 
   case 52:
-#line 606 "lab9.y"
+#line 639 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 53:
-#line 614 "lab9.y"
+#line 647 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 54:
-#line 616 "lab9.y"
+#line 649 "lab9.y"
     {
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
 						// type is not the same
@@ -2102,42 +2135,42 @@ yyreduce:
     break;
 
   case 55:
-#line 661 "lab9.y"
+#line 694 "lab9.y"
     {(yyval.operators) = A_LESSEQUAL;}
     break;
 
   case 56:
-#line 662 "lab9.y"
+#line 695 "lab9.y"
     {(yyval.operators) = A_LESSTHAN;}
     break;
 
   case 57:
-#line 663 "lab9.y"
+#line 696 "lab9.y"
     {(yyval.operators) = A_GREATERTHAN;}
     break;
 
   case 58:
-#line 664 "lab9.y"
+#line 697 "lab9.y"
     {(yyval.operators) = A_GREATEREQUAL;}
     break;
 
   case 59:
-#line 665 "lab9.y"
+#line 698 "lab9.y"
     {(yyval.operators) = A_EQUAL;}
     break;
 
   case 60:
-#line 666 "lab9.y"
+#line 699 "lab9.y"
     {(yyval.operators) = A_NOTEQUAL;}
     break;
 
   case 61:
-#line 674 "lab9.y"
+#line 707 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 62:
-#line 676 "lab9.y"
+#line 709 "lab9.y"
     {
 					// checking both of the operands are in same type
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
@@ -2182,22 +2215,22 @@ yyreduce:
     break;
 
   case 63:
-#line 721 "lab9.y"
+#line 754 "lab9.y"
     {(yyval.operators) = A_PLUS;}
     break;
 
   case 64:
-#line 722 "lab9.y"
+#line 755 "lab9.y"
     {(yyval.operators) = A_MINUS;}
     break;
 
   case 65:
-#line 729 "lab9.y"
+#line 762 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 66:
-#line 731 "lab9.y"
+#line 764 "lab9.y"
     {
 					// checking both of the operands are in same type
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
@@ -2219,27 +2252,27 @@ yyreduce:
     break;
 
   case 67:
-#line 753 "lab9.y"
+#line 786 "lab9.y"
     {(yyval.operators) = A_TIMES;}
     break;
 
   case 68:
-#line 754 "lab9.y"
+#line 787 "lab9.y"
     {(yyval.operators) = A_DEVIDE;}
     break;
 
   case 69:
-#line 755 "lab9.y"
+#line 788 "lab9.y"
     {(yyval.operators) = A_MOD;}
     break;
 
   case 70:
-#line 762 "lab9.y"
+#line 795 "lab9.y"
     {(yyval.node) = (yyvsp[(2) - (3)].node);}
     break;
 
   case 71:
-#line 764 "lab9.y"
+#line 797 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_NUM);
 					(yyval.node)->value = (yyvsp[(1) - (1)].value);
@@ -2248,17 +2281,17 @@ yyreduce:
     break;
 
   case 72:
-#line 769 "lab9.y"
+#line 802 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 73:
-#line 770 "lab9.y"
+#line 803 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 74:
-#line 772 "lab9.y"
+#line 805 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_EXPR);
 					(yyval.node)->s1 = (yyvsp[(2) - (2)].node);
@@ -2273,13 +2306,13 @@ yyreduce:
     break;
 
   case 75:
-#line 790 "lab9.y"
+#line 823 "lab9.y"
     {  // check is the function is in the symbol table
 					struct SymbTab *p = Search((yyvsp[(1) - (4)].string), 0, 0);
 					if(p == NULL){
 						// symbol not found in table, can not call a function without declaring, barf
 						yyerror((yyvsp[(1) - (4)].string));
-						yyerror("function name not defined");
+						yyerror("function only prototyped, not defined");
 						exit(1);
 					}
 					// name is  found in the table and its a function
@@ -2300,6 +2333,12 @@ yyreduce:
 						yyerror("Actual and Formals do not match");
 						exit(1);
 					}
+
+					// As function can be prototyped earliner and declaration may
+					// may showed up after the call, we need to store the call stack
+					// and check if the declaration can be found later on. if not barf on line number
+					Insert_Func_Call((yyvsp[(1) - (4)].string), linecount);
+
 					// name found in the list, it defined as function and 
 					// params are same type and length as well
 					// creating node for function call
@@ -2312,17 +2351,17 @@ yyreduce:
     break;
 
   case 76:
-#line 829 "lab9.y"
+#line 868 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 77:
-#line 830 "lab9.y"
+#line 869 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 78:
-#line 839 "lab9.y"
+#line 878 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (1)].node);
@@ -2338,7 +2377,7 @@ yyreduce:
     break;
 
   case 79:
-#line 852 "lab9.y"
+#line 891 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2355,14 +2394,14 @@ yyreduce:
     break;
 
   case 80:
-#line 872 "lab9.y"
+#line 911 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_BREAK);
 				}
     break;
 
   case 81:
-#line 876 "lab9.y"
+#line 915 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_CONTINUE);
 				}
@@ -2370,7 +2409,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2374 "y.tab.c"
+#line 2413 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2584,13 +2623,28 @@ yyreturn:
 }
 
 
-#line 880 "lab9.y"
+#line 919 "lab9.y"
 	/* end of rules, start of program */
 
 int main()
-{ 
+{
 	yyparse();
 	printf("\nFinished Parsing\n\n\n");
+
+	// Function can be prototyped and may not be called at all, thats fine
+	// However if a prototyped with no declaration can be found in called function list, we need to barf here
+	if(proto_funcCounter > 0) {
+		struct Func_Call * p = check_proto_gets_called(proto_funcCounter);
+		if(p != NULL){
+			yyerror(p->name);
+			// As there is no need of linecount variable anymore, we are setting to func call where it called undeclared function
+			// to print actual line number. as we dont want to modify yyerror function for this change.
+			// also the program is exiting, so, changing linecount would not cause problem
+			linecount = p->line_number;
+			yyerror("Call to a function that is not delcared");
+			exit(1);
+		}
+	}
 
 	Display();  // show global varaible functions
 	printf("\n\nAST PRINT\n\n");

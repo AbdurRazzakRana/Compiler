@@ -20,8 +20,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "symtable.h"
+#include "prototype.h"
 
 ASTnode *PROGRAM;
 // prototying yylex to get ride of compilation waring
@@ -36,6 +38,8 @@ int LEVEL = 0;  // global context variable to know how depth we are
 int OFFSET = 0; // global variable to accumulate required runtime space
 int GOFFSET = 0; // global variable to accumulate global variable offset
 int maxoffset = 0;  // the largest offset needed of the current function
+int proto_funcCounter=0; // function prototype counter; increases when prototype found, 
+		//decereases when a progotyped functions has declaration
 
 // when error occurs, it prints the line number
 void yyerror (char *s)  /* Called by yyparse on error */
@@ -220,11 +224,27 @@ Fun_Declaration : Grad_Fun_Common_Part Compound_Stmt
 					$$->symbol = Search($1->name, LEVEL, 0);
 					$$->symbol->offset = maxoffset;  // setting max offset as the offset for the function
 
+					struct Func_Prototype * fp = Search_Proto($$->name);
+					if(fp != NULL){
+						if(fp->value != -1){ // just a safe chacking if a prototyped function is implemented but still in prototype in list
+							yyerror($$->name);
+							yyerror("Prototyping error");
+							exit(1);
+						}
+						Delete_Proto(fp); // As the protytpe has a declaration, no need to keep in prototype list anymore
+						proto_funcCounter--; // decreasing counter as one prototype has declaration
+					}
+
 					// During walkout from the function, set back the counters for global varaibles
 					OFFSET = GOFFSET;
 				}
 	| Grad_Fun_Common_Part ';' 
 				{// Grad Student function prototyping case.
+					if(Search_Proto($1->name) != NULL){ // if there is the prototype of same funciton written again, barf
+						yyerror($1->name);
+						yyerror("attemping to prototyping twice on same funciton");
+						exit(1);
+					}
 					$$ = ASTCreateNode(A_FUNCTION_PROTO);
 					$$->my_data_type = $1->my_data_type;  //function type is described at Grad_Fun_Common_Part
 					$$->name = $1->name; // same as previous
@@ -233,6 +253,9 @@ Fun_Declaration : Grad_Fun_Common_Part Compound_Stmt
 					$$->symbol = Search($1->name, LEVEL, 0);
 					$$->symbol->offset = maxoffset;  // setting max offset as the offset for the function
 
+					Insert_Proto($1->name, LEVEL, -1); // inserting into the prototype table
+					proto_funcCounter++;	// increasing the prototype counter
+					
 					// Even though we are not going into the function for prototyping case
 					OFFSET = GOFFSET;
 				}
@@ -243,14 +266,17 @@ Fun_Declaration : Grad_Fun_Common_Part Compound_Stmt
 // therefore, left factoring using Grad_Fun_Common_Part
 Grad_Fun_Common_Part : Type_Specifier T_ID
 				{
-					if (Search($2, LEVEL, 0) != NULL) { // check if the function has been defined before
+					// added Search_Proto checking, if a function was prototyped earlieer,
+					// we need to allow this case for delcaration purpose
+					if (Search($2, LEVEL, 0) != NULL && Search_Proto($2) == NULL) { // check if the function has been defined before
 						yyerror($2);  // T_ID has alredy been used, should barf
 						yyerror("function name already in use");
 						exit(1);
 					}
 
-					// not in sym table, should be inserted
-					Insert($2, $1, SYM_FUNCTION, LEVEL, 0, 0);
+					// only insert if its not in symbol table
+					if(Search($2, LEVEL, 0) == NULL)
+						Insert($2, $1, SYM_FUNCTION, LEVEL, 0, 0);
 
 					// At the time of walkin to the function resettting counters
 					/*while chekcing assignment testcases, setting offset = 0 will match the outputs
@@ -262,7 +288,14 @@ Grad_Fun_Common_Part : Type_Specifier T_ID
 				}
  			'(' Params ')'
 				{
-					Search($2, LEVEL, 0) -> fparms = $5;  // setting pointer to the function parameters 
+					struct SymbTab *p = Search($2, LEVEL, 0);
+					// if not delcared earier or declared but prototyped shoudl pass
+					if (Search_Proto($2) != NULL && check_params(p->fparms, $5)==0){ 
+						// previously declared prototype and current actuals does not match
+						yyerror("Parameter mismatch: Prototype formals and declaration actuals ");
+						exit(1);
+					}
+					p-> fparms = $5;  // setting pointer to the function parameters 
 
 					$$ = ASTCreateNode(A_FUNCTION_COMMON); // setting up name, type and s1 for both prototype and func dec
 					$$->my_data_type = $1;
@@ -792,7 +825,7 @@ Call : T_ID '(' Args ')'
 					if(p == NULL){
 						// symbol not found in table, can not call a function without declaring, barf
 						yyerror($1);
-						yyerror("function name not defined");
+						yyerror("function only prototyped, not defined");
 						exit(1);
 					}
 					// name is  found in the table and its a function
@@ -813,6 +846,12 @@ Call : T_ID '(' Args ')'
 						yyerror("Actual and Formals do not match");
 						exit(1);
 					}
+
+					// As function can be prototyped earliner and declaration may
+					// may showed up after the call, we need to store the call stack
+					// and check if the declaration can be found later on. if not barf on line number
+					Insert_Func_Call($1, linecount);
+
 					// name found in the list, it defined as function and 
 					// params are same type and length as well
 					// creating node for function call
@@ -880,9 +919,24 @@ Break_Continue_Stmt : T_BREAK ';'
 %%	/* end of rules, start of program */
 
 int main()
-{ 
+{
 	yyparse();
 	printf("\nFinished Parsing\n\n\n");
+
+	// Function can be prototyped and may not be called at all, thats fine
+	// However if a prototyped with no declaration can be found in called function list, we need to barf here
+	if(proto_funcCounter > 0) {
+		struct Func_Call * p = check_proto_gets_called(proto_funcCounter);
+		if(p != NULL){
+			yyerror(p->name);
+			// As there is no need of linecount variable anymore, we are setting to func call where it called undeclared function
+			// to print actual line number. as we dont want to modify yyerror function for this change.
+			// also the program is exiting, so, changing linecount would not cause problem
+			linecount = p->line_number;
+			yyerror("Call to a function that is not delcared");
+			exit(1);
+		}
+	}
 
 	Display();  // show global varaible functions
 	printf("\n\nAST PRINT\n\n");
