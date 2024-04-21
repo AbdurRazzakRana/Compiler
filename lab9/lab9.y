@@ -500,8 +500,8 @@ Assignment_Stmt : Var '=' Simple_Expression ';'
 
 					if($1->my_data_type != $3->my_data_type){
 						// type is not the same
-						printf("%s type: %d\n", $1->name, $1->my_data_type);
-						printf("%s type: %d\n", $3->name, $3->my_data_type);
+						// printf("%s type: %d\n", $1->name, $1->my_data_type);
+						// printf("%s type: %d\n", $3->name, $3->my_data_type);
 						yyerror("Type Mismatch");
 						exit(1);
 					}
@@ -704,6 +704,8 @@ Factor : '(' Expression ')' {$$ = $2;}
 					$$ = ASTCreateNode(A_EXPR);
 					$$->s1 = $2;
 					$$->operator = A_UNIRY_MINUS;
+				// synthensis  for unary minus type
+					$$->my_data_type = $2->my_data_type;
 
 					$$->name = CreateTemp(); // unary minus operation in register
 					$$->symbol = Insert($$->name, $2->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);

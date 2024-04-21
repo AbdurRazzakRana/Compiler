@@ -524,8 +524,8 @@ static const yytype_uint16 yyrline[] =
      411,   419,   427,   444,   456,   460,   470,   481,   486,   498,
      522,   543,   582,   590,   591,   615,   616,   617,   618,   619,
      620,   628,   629,   652,   653,   660,   661,   684,   685,   686,
-     693,   694,   700,   701,   702,   718,   758,   759,   767,   780,
-     800,   804
+     693,   694,   700,   701,   702,   720,   760,   761,   769,   782,
+     802,   806
 };
 #endif
 
@@ -1947,8 +1947,8 @@ yyreduce:
 
 					if((yyvsp[(1) - (4)].node)->my_data_type != (yyvsp[(3) - (4)].node)->my_data_type){
 						// type is not the same
-						printf("%s type: %d\n", (yyvsp[(1) - (4)].node)->name, (yyvsp[(1) - (4)].node)->my_data_type);
-						printf("%s type: %d\n", (yyvsp[(3) - (4)].node)->name, (yyvsp[(3) - (4)].node)->my_data_type);
+						// printf("%s type: %d\n", $1->name, $1->my_data_type);
+						// printf("%s type: %d\n", $3->name, $3->my_data_type);
 						yyerror("Type Mismatch");
 						exit(1);
 					}
@@ -2194,6 +2194,8 @@ yyreduce:
 					(yyval.node) = ASTCreateNode(A_EXPR);
 					(yyval.node)->s1 = (yyvsp[(2) - (2)].node);
 					(yyval.node)->operator = A_UNIRY_MINUS;
+				// synthensis  for unary minus type
+					(yyval.node)->my_data_type = (yyvsp[(2) - (2)].node)->my_data_type;
 
 					(yyval.node)->name = CreateTemp(); // unary minus operation in register
 					(yyval.node)->symbol = Insert((yyval.node)->name, (yyvsp[(2) - (2)].node)->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
@@ -2202,7 +2204,7 @@ yyreduce:
     break;
 
   case 75:
-#line 719 "lab9.y"
+#line 721 "lab9.y"
     {  // check is the function is in the symbol table
 					struct SymbTab *p = Search((yyvsp[(1) - (4)].string), 0, 0);
 					if(p == NULL){
@@ -2241,17 +2243,17 @@ yyreduce:
     break;
 
   case 76:
-#line 758 "lab9.y"
+#line 760 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 77:
-#line 759 "lab9.y"
+#line 761 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 78:
-#line 768 "lab9.y"
+#line 770 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (1)].node);
@@ -2267,7 +2269,7 @@ yyreduce:
     break;
 
   case 79:
-#line 781 "lab9.y"
+#line 783 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2284,14 +2286,14 @@ yyreduce:
     break;
 
   case 80:
-#line 801 "lab9.y"
+#line 803 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_BREAK);
 				}
     break;
 
   case 81:
-#line 805 "lab9.y"
+#line 807 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_CONTINUE);
 				}
@@ -2299,7 +2301,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2303 "y.tab.c"
+#line 2305 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2513,7 +2515,7 @@ yyreturn:
 }
 
 
-#line 809 "lab9.y"
+#line 811 "lab9.y"
 	/* end of rules, start of program */
 
 int main()
