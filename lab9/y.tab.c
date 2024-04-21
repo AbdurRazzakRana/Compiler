@@ -522,10 +522,10 @@ static const yytype_uint16 yyrline[] =
      282,   283,   295,   315,   341,   341,   364,   369,   378,   383,
      390,   391,   392,   393,   394,   395,   396,   397,   398,   405,
      411,   419,   427,   444,   456,   460,   470,   481,   486,   498,
-     522,   543,   582,   590,   591,   615,   616,   617,   618,   619,
-     620,   628,   629,   652,   653,   660,   661,   684,   685,   686,
-     693,   694,   700,   701,   702,   720,   760,   761,   769,   782,
-     802,   806
+     546,   567,   606,   614,   615,   661,   662,   663,   664,   665,
+     666,   674,   675,   721,   722,   729,   730,   753,   754,   755,
+     762,   763,   769,   770,   771,   789,   829,   830,   838,   851,
+     871,   875
 };
 #endif
 
@@ -1952,6 +1952,30 @@ yyreduce:
 						yyerror("Type Mismatch");
 						exit(1);
 					}
+
+				// This case will protect the case x = y or 5 = y
+    // where x is int and y is an array
+    if(((yyvsp[(1) - (4)].node)->symbol == NULL || (yyvsp[(1) - (4)].node)->symbol->SubType == SYM_SCALAR)
+     && ((yyvsp[(3) - (4)].node)->symbol != NULL && (yyvsp[(3) - (4)].node)->symbol->SubType == SYM_ARRAY)){
+					if((yyvsp[(3) - (4)].node)->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror((yyvsp[(3) - (4)].node)->name);
+     yyerror("ARRAY can not be set to SCALAR");
+     exit(1);
+     }    
+    // This case will protect the case y = x or y = 5
+    // where x is int and y is an array
+    if(((yyvsp[(1) - (4)].node)->symbol != NULL && (yyvsp[(1) - (4)].node)->symbol->SubType == SYM_ARRAY)
+     && ((yyvsp[(3) - (4)].node)->symbol == NULL || (yyvsp[(3) - (4)].node)->symbol->SubType == SYM_SCALAR)){
+					if((yyvsp[(3) - (4)].node)->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror((yyvsp[(3) - (4)].node)->name);
+     yyerror("SCALER can not be set to ARRAY");
+     exit(1);
+     }
+
 					(yyval.node) = ASTCreateNode(A_ASSGN_STAT);
 					(yyval.node)->s1 = (yyvsp[(1) - (4)].node);
 					(yyval.node)->s2 = (yyvsp[(3) - (4)].node);
@@ -1963,7 +1987,7 @@ yyreduce:
     break;
 
   case 50:
-#line 523 "lab9.y"
+#line 547 "lab9.y"
     {
 					struct SymbTab *p = Search ((yyvsp[(1) - (1)].string), LEVEL, 	1);
 					if (p == NULL) {
@@ -1987,7 +2011,7 @@ yyreduce:
     break;
 
   case 51:
-#line 544 "lab9.y"
+#line 568 "lab9.y"
     {
 					struct SymbTab *p = Search ((yyvsp[(1) - (4)].string), LEVEL,	1);
 					if (p == NULL) {
@@ -2025,23 +2049,45 @@ yyreduce:
     break;
 
   case 52:
-#line 582 "lab9.y"
+#line 606 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 53:
-#line 590 "lab9.y"
+#line 614 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 54:
-#line 592 "lab9.y"
+#line 616 "lab9.y"
     {
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
 						// type is not the same
 						yyerror("Type Mismatch");
 						exit(1);
 					}
+
+				// int x, y[100]; x * y or 5*y should not work
+    if(((yyvsp[(1) - (3)].node)->symbol == NULL || (yyvsp[(1) - (3)].node)->symbol->SubType == SYM_SCALAR)
+     && ((yyvsp[(3) - (3)].node)->symbol != NULL && (yyvsp[(3) - (3)].node)->symbol->SubType == SYM_ARRAY)){
+					if((yyvsp[(3) - (3)].node)->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror((yyvsp[(3) - (3)].node)->name);
+     yyerror("ARRAY can not be relop with SCALAR");
+     exit(1);
+     }
+    
+    // int x, y[100]; y * x or y * 5 should not work
+    if(((yyvsp[(1) - (3)].node)->symbol != NULL && (yyvsp[(1) - (3)].node)->symbol->SubType == SYM_ARRAY)
+     && ((yyvsp[(3) - (3)].node)->symbol == NULL || (yyvsp[(3) - (3)].node)->symbol->SubType == SYM_SCALAR)){
+					if((yyvsp[(3) - (3)].node)->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror((yyvsp[(3) - (3)].node)->name);
+     yyerror("SCALER can not be relop with ARRAY");
+     exit(1);
+     }
 
 					(yyval.node) = ASTCreateNode(A_EXPR);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2056,42 +2102,42 @@ yyreduce:
     break;
 
   case 55:
-#line 615 "lab9.y"
+#line 661 "lab9.y"
     {(yyval.operators) = A_LESSEQUAL;}
     break;
 
   case 56:
-#line 616 "lab9.y"
+#line 662 "lab9.y"
     {(yyval.operators) = A_LESSTHAN;}
     break;
 
   case 57:
-#line 617 "lab9.y"
+#line 663 "lab9.y"
     {(yyval.operators) = A_GREATERTHAN;}
     break;
 
   case 58:
-#line 618 "lab9.y"
+#line 664 "lab9.y"
     {(yyval.operators) = A_GREATEREQUAL;}
     break;
 
   case 59:
-#line 619 "lab9.y"
+#line 665 "lab9.y"
     {(yyval.operators) = A_EQUAL;}
     break;
 
   case 60:
-#line 620 "lab9.y"
+#line 666 "lab9.y"
     {(yyval.operators) = A_NOTEQUAL;}
     break;
 
   case 61:
-#line 628 "lab9.y"
+#line 674 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 62:
-#line 630 "lab9.y"
+#line 676 "lab9.y"
     {
 					// checking both of the operands are in same type
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
@@ -2099,6 +2145,29 @@ yyreduce:
 						yyerror("Type Mismatch");
 						exit(1);
 					}
+	
+				// int x, y[100]; x + y or 5+y should not work
+    if(((yyvsp[(1) - (3)].node)->symbol == NULL || (yyvsp[(1) - (3)].node)->symbol->SubType == SYM_SCALAR)
+     && ((yyvsp[(3) - (3)].node)->symbol != NULL && (yyvsp[(3) - (3)].node)->symbol->SubType == SYM_ARRAY)){
+					if((yyvsp[(3) - (3)].node)->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror((yyvsp[(3) - (3)].node)->name);
+     yyerror("ARRAY can not be addop with SCALAR");
+     exit(1);
+     }
+    
+    // int x, y[100]; y + x or y + 5 should not work
+    if(((yyvsp[(1) - (3)].node)->symbol != NULL && (yyvsp[(1) - (3)].node)->symbol->SubType == SYM_ARRAY)
+     && ((yyvsp[(3) - (3)].node)->symbol == NULL || (yyvsp[(3) - (3)].node)->symbol->SubType == SYM_SCALAR)){
+					if((yyvsp[(3) - (3)].node)->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror((yyvsp[(3) - (3)].node)->name);
+     yyerror("SCALER can not be addop with ARRAY");
+     exit(1);
+     }
+
 					// type is same, we can do the operation
 					(yyval.node) = ASTCreateNode(A_EXPR);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2113,22 +2182,22 @@ yyreduce:
     break;
 
   case 63:
-#line 652 "lab9.y"
+#line 721 "lab9.y"
     {(yyval.operators) = A_PLUS;}
     break;
 
   case 64:
-#line 653 "lab9.y"
+#line 722 "lab9.y"
     {(yyval.operators) = A_MINUS;}
     break;
 
   case 65:
-#line 660 "lab9.y"
+#line 729 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 66:
-#line 662 "lab9.y"
+#line 731 "lab9.y"
     {
 					// checking both of the operands are in same type
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
@@ -2150,27 +2219,27 @@ yyreduce:
     break;
 
   case 67:
-#line 684 "lab9.y"
+#line 753 "lab9.y"
     {(yyval.operators) = A_TIMES;}
     break;
 
   case 68:
-#line 685 "lab9.y"
+#line 754 "lab9.y"
     {(yyval.operators) = A_DEVIDE;}
     break;
 
   case 69:
-#line 686 "lab9.y"
+#line 755 "lab9.y"
     {(yyval.operators) = A_MOD;}
     break;
 
   case 70:
-#line 693 "lab9.y"
+#line 762 "lab9.y"
     {(yyval.node) = (yyvsp[(2) - (3)].node);}
     break;
 
   case 71:
-#line 695 "lab9.y"
+#line 764 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_NUM);
 					(yyval.node)->value = (yyvsp[(1) - (1)].value);
@@ -2179,17 +2248,17 @@ yyreduce:
     break;
 
   case 72:
-#line 700 "lab9.y"
+#line 769 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 73:
-#line 701 "lab9.y"
+#line 770 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 74:
-#line 703 "lab9.y"
+#line 772 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_EXPR);
 					(yyval.node)->s1 = (yyvsp[(2) - (2)].node);
@@ -2204,7 +2273,7 @@ yyreduce:
     break;
 
   case 75:
-#line 721 "lab9.y"
+#line 790 "lab9.y"
     {  // check is the function is in the symbol table
 					struct SymbTab *p = Search((yyvsp[(1) - (4)].string), 0, 0);
 					if(p == NULL){
@@ -2243,17 +2312,17 @@ yyreduce:
     break;
 
   case 76:
-#line 760 "lab9.y"
+#line 829 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 77:
-#line 761 "lab9.y"
+#line 830 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 78:
-#line 770 "lab9.y"
+#line 839 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (1)].node);
@@ -2269,7 +2338,7 @@ yyreduce:
     break;
 
   case 79:
-#line 783 "lab9.y"
+#line 852 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2286,14 +2355,14 @@ yyreduce:
     break;
 
   case 80:
-#line 803 "lab9.y"
+#line 872 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_BREAK);
 				}
     break;
 
   case 81:
-#line 807 "lab9.y"
+#line 876 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_CONTINUE);
 				}
@@ -2301,7 +2370,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2305 "y.tab.c"
+#line 2374 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2515,7 +2584,7 @@ yyreturn:
 }
 
 
-#line 811 "lab9.y"
+#line 880 "lab9.y"
 	/* end of rules, start of program */
 
 int main()

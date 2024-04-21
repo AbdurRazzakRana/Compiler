@@ -505,6 +505,30 @@ Assignment_Stmt : Var '=' Simple_Expression ';'
 						yyerror("Type Mismatch");
 						exit(1);
 					}
+
+				// This case will protect the case x = y or 5 = y
+    // where x is int and y is an array
+    if(($1->symbol == NULL || $1->symbol->SubType == SYM_SCALAR)
+     && ($3->symbol != NULL && $3->symbol->SubType == SYM_ARRAY)){
+					if($3->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror($3->name);
+     yyerror("ARRAY can not be set to SCALAR");
+     exit(1);
+     }    
+    // This case will protect the case y = x or y = 5
+    // where x is int and y is an array
+    if(($1->symbol != NULL && $1->symbol->SubType == SYM_ARRAY)
+     && ($3->symbol == NULL || $3->symbol->SubType == SYM_SCALAR)){
+					if($3->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror($3->name);
+     yyerror("SCALER can not be set to ARRAY");
+     exit(1);
+     }
+
 					$$ = ASTCreateNode(A_ASSGN_STAT);
 					$$->s1 = $1;
 					$$->s2 = $3;
@@ -596,6 +620,28 @@ Simple_Expression : Additive_Expression {$$ = $1;}
 						exit(1);
 					}
 
+				// int x, y[100]; x * y or 5*y should not work
+    if(($1->symbol == NULL || $1->symbol->SubType == SYM_SCALAR)
+     && ($3->symbol != NULL && $3->symbol->SubType == SYM_ARRAY)){
+					if($3->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror($3->name);
+     yyerror("ARRAY can not be relop with SCALAR");
+     exit(1);
+     }
+    
+    // int x, y[100]; y * x or y * 5 should not work
+    if(($1->symbol != NULL && $1->symbol->SubType == SYM_ARRAY)
+     && ($3->symbol == NULL || $3->symbol->SubType == SYM_SCALAR)){
+					if($3->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror($3->name);
+     yyerror("SCALER can not be relop with ARRAY");
+     exit(1);
+     }
+
 					$$ = ASTCreateNode(A_EXPR);
 					$$->s1 = $1;
 					$$->s2 = $3;
@@ -634,6 +680,29 @@ Additive_Expression : Term {$$ = $1;}
 						yyerror("Type Mismatch");
 						exit(1);
 					}
+	
+				// int x, y[100]; x + y or 5+y should not work
+    if(($1->symbol == NULL || $1->symbol->SubType == SYM_SCALAR)
+     && ($3->symbol != NULL && $3->symbol->SubType == SYM_ARRAY)){
+					if($3->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror($3->name);
+     yyerror("ARRAY can not be addop with SCALAR");
+     exit(1);
+     }
+    
+    // int x, y[100]; y + x or y + 5 should not work
+    if(($1->symbol != NULL && $1->symbol->SubType == SYM_ARRAY)
+     && ($3->symbol == NULL || $3->symbol->SubType == SYM_SCALAR)){
+					if($3->name == NULL)
+						yyerror("T_NUM");
+					else
+						yyerror($3->name);
+     yyerror("SCALER can not be addop with ARRAY");
+     exit(1);
+     }
+
 					// type is same, we can do the operation
 					$$ = ASTCreateNode(A_EXPR);
 					$$->s1 = $1;
