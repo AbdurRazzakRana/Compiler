@@ -139,6 +139,7 @@
 #include "ast.h"
 #include "symtable.h"
 #include "prototype.h"
+#include "emit.h"
 
 ASTnode *PROGRAM;
 // prototying yylex to get ride of compilation waring
@@ -185,7 +186,7 @@ void yyerror (char *s)  /* Called by yyparse on error */
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 57 "lab9.y"
+#line 58 "lab9.y"
 {
 	int value;
 	char * string;
@@ -194,7 +195,7 @@ typedef union YYSTYPE
 	enum AST_OPERATORS operators;
 }
 /* Line 193 of yacc.c.  */
-#line 198 "y.tab.c"
+#line 199 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -207,7 +208,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 211 "y.tab.c"
+#line 212 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -521,15 +522,15 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   111,   111,   122,   123,   133,   134,   143,   178,   183,
-     189,   195,   208,   209,   216,   241,   268,   267,   308,   309,
-     315,   316,   328,   348,   374,   374,   397,   402,   411,   416,
-     423,   424,   425,   426,   427,   428,   429,   430,   431,   438,
-     444,   452,   460,   477,   489,   493,   503,   514,   519,   531,
-     579,   600,   639,   647,   648,   694,   695,   696,   697,   698,
-     699,   707,   708,   754,   755,   762,   763,   786,   787,   788,
-     795,   796,   802,   803,   804,   822,   868,   869,   877,   890,
-     910,   914
+       0,   112,   112,   123,   124,   134,   135,   144,   179,   184,
+     190,   196,   209,   210,   217,   242,   269,   268,   309,   310,
+     316,   317,   329,   349,   375,   375,   398,   403,   412,   417,
+     424,   425,   426,   427,   428,   429,   430,   431,   432,   439,
+     445,   453,   461,   478,   490,   494,   504,   515,   520,   532,
+     580,   601,   640,   648,   649,   695,   696,   697,   698,   699,
+     700,   708,   709,   755,   756,   763,   764,   787,   788,   789,
+     796,   797,   803,   804,   805,   823,   869,   870,   878,   891,
+     911,   915
 };
 #endif
 
@@ -1527,17 +1528,17 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 111 "lab9.y"
+#line 112 "lab9.y"
     {PROGRAM = (yyvsp[(1) - (1)].node);}
     break;
 
   case 3:
-#line 122 "lab9.y"
+#line 123 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 4:
-#line 123 "lab9.y"
+#line 124 "lab9.y"
     {
 		(yyval.node) = (yyvsp[(1) - (2)].node);
 		(yyval.node) -> next= (yyvsp[(2) - (2)].node);
@@ -1545,17 +1546,17 @@ yyreduce:
     break;
 
   case 5:
-#line 133 "lab9.y"
-    {(yyval.node) = (yyvsp[(1) - (1)].node);}
-    break;
-
-  case 6:
 #line 134 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
+  case 6:
+#line 135 "lab9.y"
+    {(yyval.node) = (yyvsp[(1) - (1)].node);}
+    break;
+
   case 7:
-#line 144 "lab9.y"
+#line 145 "lab9.y"
     {
 					// populate the s1 connected list with the defined type via $1;
 					ASTnode *p = (yyvsp[(2) - (3)].node);
@@ -1586,7 +1587,7 @@ yyreduce:
     break;
 
   case 8:
-#line 179 "lab9.y"
+#line 180 "lab9.y"
     { 
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (1)].string);
@@ -1594,7 +1595,7 @@ yyreduce:
     break;
 
   case 9:
-#line 184 "lab9.y"
+#line 185 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (4)].string);
@@ -1603,7 +1604,7 @@ yyreduce:
     break;
 
   case 10:
-#line 190 "lab9.y"
+#line 191 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (3)].string);
@@ -1612,7 +1613,7 @@ yyreduce:
     break;
 
   case 11:
-#line 196 "lab9.y"
+#line 197 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_VARDEC);
 					(yyval.node)->name = (yyvsp[(1) - (6)].string);
@@ -1622,17 +1623,17 @@ yyreduce:
     break;
 
   case 12:
-#line 208 "lab9.y"
+#line 209 "lab9.y"
     {(yyval.d_type) = A_INTTYPE;}
     break;
 
   case 13:
-#line 209 "lab9.y"
+#line 210 "lab9.y"
     {(yyval.d_type) = A_VOIDTYPE;}
     break;
 
   case 14:
-#line 217 "lab9.y"
+#line 218 "lab9.y"
     { 
 					// function declaration with compound statement
 					(yyval.node) = ASTCreateNode(A_FUNCTIONDEC);
@@ -1660,7 +1661,7 @@ yyreduce:
     break;
 
   case 15:
-#line 242 "lab9.y"
+#line 243 "lab9.y"
     {// Grad Student function prototyping case.
 					if(Search_Proto((yyvsp[(1) - (2)].node)->name) != NULL){ // if there is the prototype of same funciton written again, barf
 						yyerror((yyvsp[(1) - (2)].node)->name);
@@ -1684,7 +1685,7 @@ yyreduce:
     break;
 
   case 16:
-#line 268 "lab9.y"
+#line 269 "lab9.y"
     {
 					// added Search_Proto checking, if a function was prototyped earlieer,
 					// we need to allow this case for delcaration purpose
@@ -1709,7 +1710,7 @@ yyreduce:
     break;
 
   case 17:
-#line 290 "lab9.y"
+#line 291 "lab9.y"
     {
 					struct SymbTab *p = Search((yyvsp[(2) - (6)].string), LEVEL, 0);
 					// if not delcared earier or declared but prototyped shoudl pass
@@ -1728,22 +1729,22 @@ yyreduce:
     break;
 
   case 18:
-#line 308 "lab9.y"
+#line 309 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 19:
-#line 309 "lab9.y"
+#line 310 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 20:
-#line 315 "lab9.y"
+#line 316 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 21:
-#line 317 "lab9.y"
+#line 318 "lab9.y"
     {
 					(yyval.node) = (yyvsp[(1) - (3)].node);
 					(yyval.node)->next = (yyvsp[(3) - (3)].node);
@@ -1751,7 +1752,7 @@ yyreduce:
     break;
 
   case 22:
-#line 329 "lab9.y"
+#line 330 "lab9.y"
     {
 					// check if name is already used
 					// level+1 because varaibles in parameters will be used as child level inside function
@@ -1774,7 +1775,7 @@ yyreduce:
     break;
 
   case 23:
-#line 349 "lab9.y"
+#line 350 "lab9.y"
     {
 					// check if name is already used
 					// level+1 because varaibles in parameters will be used as child level inside function
@@ -1796,18 +1797,18 @@ yyreduce:
     break;
 
   case 24:
-#line 374 "lab9.y"
+#line 375 "lab9.y"
     {LEVEL++;}
     break;
 
   case 25:
-#line 375 "lab9.y"
+#line 376 "lab9.y"
     {
 					// Before walkin to the function, level +1
 					(yyval.node) = ASTCreateNode(A_COMPOUND);
 					(yyval.node)->s1 = (yyvsp[(3) - (5)].node);
 					(yyval.node)->s2 = (yyvsp[(4) - (5)].node);
-					Display();
+					if(mydebug) Display();
 					// setting the maxoffset to the higher counter
 					if (OFFSET > maxoffset)
 						maxoffset = OFFSET;
@@ -1820,7 +1821,7 @@ yyreduce:
     break;
 
   case 26:
-#line 398 "lab9.y"
+#line 399 "lab9.y"
     {
 					(yyval.node) = (yyvsp[(1) - (2)].node);
 					(yyval.node)->next = (yyvsp[(2) - (2)].node);
@@ -1828,12 +1829,12 @@ yyreduce:
     break;
 
   case 27:
-#line 402 "lab9.y"
+#line 403 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 28:
-#line 412 "lab9.y"
+#line 413 "lab9.y"
     {
 					(yyval.node) = (yyvsp[(1) - (2)].node);
 					(yyval.node)->next = (yyvsp[(2) - (2)].node);
@@ -1841,57 +1842,57 @@ yyreduce:
     break;
 
   case 29:
-#line 416 "lab9.y"
+#line 417 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 30:
-#line 423 "lab9.y"
-    {(yyval.node) = (yyvsp[(1) - (1)].node);}
-    break;
-
-  case 31:
 #line 424 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 32:
+  case 31:
 #line 425 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 33:
+  case 32:
 #line 426 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 34:
+  case 33:
 #line 427 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 35:
+  case 34:
 #line 428 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 36:
+  case 35:
 #line 429 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 37:
+  case 36:
 #line 430 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
-  case 38:
+  case 37:
 #line 431 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
+  case 38:
+#line 432 "lab9.y"
+    {(yyval.node) = (yyvsp[(1) - (1)].node);}
+    break;
+
   case 39:
-#line 439 "lab9.y"
+#line 440 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_EXPR_STAT);
 					(yyval.node)->s1 = (yyvsp[(1) - (2)].node);
@@ -1899,12 +1900,12 @@ yyreduce:
     break;
 
   case 40:
-#line 444 "lab9.y"
+#line 445 "lab9.y"
     {(yyval.node) = ASTCreateNode(A_EXPR_STAT);}
     break;
 
   case 41:
-#line 453 "lab9.y"
+#line 454 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_IF); 
 					(yyval.node)->s1 = (yyvsp[(3) - (5)].node);
@@ -1915,7 +1916,7 @@ yyreduce:
     break;
 
   case 42:
-#line 461 "lab9.y"
+#line 462 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_IF);    
 					(yyval.node)->s1 = (yyvsp[(3) - (7)].node);	// setting expression to the first child of IF Condition
@@ -1927,7 +1928,7 @@ yyreduce:
     break;
 
   case 43:
-#line 478 "lab9.y"
+#line 479 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_WHILE_STAT);
 					(yyval.node)->s1 = (yyvsp[(3) - (5)].node);
@@ -1936,14 +1937,14 @@ yyreduce:
     break;
 
   case 44:
-#line 490 "lab9.y"
+#line 491 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_RETURN_STAT);
 				}
     break;
 
   case 45:
-#line 494 "lab9.y"
+#line 495 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_RETURN_STAT);
 					(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1951,7 +1952,7 @@ yyreduce:
     break;
 
   case 46:
-#line 504 "lab9.y"
+#line 505 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_READ);
 					(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1959,7 +1960,7 @@ yyreduce:
     break;
 
   case 47:
-#line 515 "lab9.y"
+#line 516 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_WRITE);
 					(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1967,7 +1968,7 @@ yyreduce:
     break;
 
   case 48:
-#line 520 "lab9.y"
+#line 521 "lab9.y"
     {	
 					(yyval.node) = ASTCreateNode(A_WRITE);
 					(yyval.node)->name = (yyvsp[(2) - (3)].string);
@@ -1975,7 +1976,7 @@ yyreduce:
     break;
 
   case 49:
-#line 532 "lab9.y"
+#line 533 "lab9.y"
     {
 
 					if((yyvsp[(1) - (4)].node)->my_data_type != (yyvsp[(3) - (4)].node)->my_data_type){
@@ -2020,7 +2021,7 @@ yyreduce:
     break;
 
   case 50:
-#line 580 "lab9.y"
+#line 581 "lab9.y"
     {
 					struct SymbTab *p = Search ((yyvsp[(1) - (1)].string), LEVEL, 	1);
 					if (p == NULL) {
@@ -2044,7 +2045,7 @@ yyreduce:
     break;
 
   case 51:
-#line 601 "lab9.y"
+#line 602 "lab9.y"
     {
 					struct SymbTab *p = Search ((yyvsp[(1) - (4)].string), LEVEL,	1);
 					if (p == NULL) {
@@ -2082,17 +2083,17 @@ yyreduce:
     break;
 
   case 52:
-#line 639 "lab9.y"
+#line 640 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 53:
-#line 647 "lab9.y"
+#line 648 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 54:
-#line 649 "lab9.y"
+#line 650 "lab9.y"
     {
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
 						// type is not the same
@@ -2135,42 +2136,42 @@ yyreduce:
     break;
 
   case 55:
-#line 694 "lab9.y"
+#line 695 "lab9.y"
     {(yyval.operators) = A_LESSEQUAL;}
     break;
 
   case 56:
-#line 695 "lab9.y"
+#line 696 "lab9.y"
     {(yyval.operators) = A_LESSTHAN;}
     break;
 
   case 57:
-#line 696 "lab9.y"
+#line 697 "lab9.y"
     {(yyval.operators) = A_GREATERTHAN;}
     break;
 
   case 58:
-#line 697 "lab9.y"
+#line 698 "lab9.y"
     {(yyval.operators) = A_GREATEREQUAL;}
     break;
 
   case 59:
-#line 698 "lab9.y"
+#line 699 "lab9.y"
     {(yyval.operators) = A_EQUAL;}
     break;
 
   case 60:
-#line 699 "lab9.y"
+#line 700 "lab9.y"
     {(yyval.operators) = A_NOTEQUAL;}
     break;
 
   case 61:
-#line 707 "lab9.y"
+#line 708 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 62:
-#line 709 "lab9.y"
+#line 710 "lab9.y"
     {
 					// checking both of the operands are in same type
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
@@ -2215,22 +2216,22 @@ yyreduce:
     break;
 
   case 63:
-#line 754 "lab9.y"
+#line 755 "lab9.y"
     {(yyval.operators) = A_PLUS;}
     break;
 
   case 64:
-#line 755 "lab9.y"
+#line 756 "lab9.y"
     {(yyval.operators) = A_MINUS;}
     break;
 
   case 65:
-#line 762 "lab9.y"
+#line 763 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 66:
-#line 764 "lab9.y"
+#line 765 "lab9.y"
     {
 					// checking both of the operands are in same type
 					if((yyvsp[(1) - (3)].node)->my_data_type != (yyvsp[(3) - (3)].node)->my_data_type){
@@ -2252,27 +2253,27 @@ yyreduce:
     break;
 
   case 67:
-#line 786 "lab9.y"
+#line 787 "lab9.y"
     {(yyval.operators) = A_TIMES;}
     break;
 
   case 68:
-#line 787 "lab9.y"
+#line 788 "lab9.y"
     {(yyval.operators) = A_DEVIDE;}
     break;
 
   case 69:
-#line 788 "lab9.y"
+#line 789 "lab9.y"
     {(yyval.operators) = A_MOD;}
     break;
 
   case 70:
-#line 795 "lab9.y"
+#line 796 "lab9.y"
     {(yyval.node) = (yyvsp[(2) - (3)].node);}
     break;
 
   case 71:
-#line 797 "lab9.y"
+#line 798 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_NUM);
 					(yyval.node)->value = (yyvsp[(1) - (1)].value);
@@ -2281,17 +2282,17 @@ yyreduce:
     break;
 
   case 72:
-#line 802 "lab9.y"
-    {(yyval.node) = (yyvsp[(1) - (1)].node);}
-    break;
-
-  case 73:
 #line 803 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
+  case 73:
+#line 804 "lab9.y"
+    {(yyval.node) = (yyvsp[(1) - (1)].node);}
+    break;
+
   case 74:
-#line 805 "lab9.y"
+#line 806 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_EXPR);
 					(yyval.node)->s1 = (yyvsp[(2) - (2)].node);
@@ -2306,7 +2307,7 @@ yyreduce:
     break;
 
   case 75:
-#line 823 "lab9.y"
+#line 824 "lab9.y"
     {  // check is the function is in the symbol table
 					struct SymbTab *p = Search((yyvsp[(1) - (4)].string), 0, 0);
 					if(p == NULL){
@@ -2351,17 +2352,17 @@ yyreduce:
     break;
 
   case 76:
-#line 868 "lab9.y"
+#line 869 "lab9.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 77:
-#line 869 "lab9.y"
+#line 870 "lab9.y"
     {(yyval.node) = NULL;}
     break;
 
   case 78:
-#line 878 "lab9.y"
+#line 879 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (1)].node);
@@ -2377,7 +2378,7 @@ yyreduce:
     break;
 
   case 79:
-#line 891 "lab9.y"
+#line 892 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_ARG);
 					(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2394,14 +2395,14 @@ yyreduce:
     break;
 
   case 80:
-#line 911 "lab9.y"
+#line 912 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_BREAK);
 				}
     break;
 
   case 81:
-#line 915 "lab9.y"
+#line 916 "lab9.y"
     {
 					(yyval.node) = ASTCreateNode(A_CONTINUE);
 				}
@@ -2409,7 +2410,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2413 "y.tab.c"
+#line 2414 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2623,13 +2624,39 @@ yyreturn:
 }
 
 
-#line 919 "lab9.y"
+#line 920 "lab9.y"
 	/* end of rules, start of program */
 
-int main()
+int main(int argc, char* argv[])
 {
+	FILE *fp;
+	char s[100];
+	int i;
+	//read our input arugments
+	// option -d turn on debug
+	// option -o next arugment is out output file name
+	
+	for(i =0;i<argc;i++){
+		if(strcmp(argv[i], "-d")==0){
+			mydebug = 1;
+		}
+		if(strcmp(argv[i], "-o")==0){
+			// we have a file input
+			strcpy(s, argv[i+1]);
+			strcat(s, ".asm");
+			if(mydebug) printf("File name is %s\n", s);
+		}
+	}
+
+	// open the file that is referenced by s 
+	fp = fopen(s, "w");
+	if (fp == NULL){
+		printf("can not open file %s\n",s);
+		exit(1);
+	}
+
 	yyparse();
-	printf("\nFinished Parsing\n\n\n");
+	if(mydebug) printf("\nFinished Parsing\n\n\n");
 
 	// Function can be prototyped and may not be called at all, thats fine
 	// However if a prototyped with no declaration can be found in called function list, we need to barf here
@@ -2646,7 +2673,9 @@ int main()
 		}
 	}
 
-	Display();  // show global varaible functions
-	printf("\n\nAST PRINT\n\n");
-	ASTprint(0, PROGRAM);
+	if(mydebug) Display();  // show global varaible functions
+	if(mydebug) printf("\n\nAST PRINT\n\n");
+	if(mydebug) ASTprint(0, PROGRAM);
+
+	EMIT(PROGRAM, fp);
 }

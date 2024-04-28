@@ -24,6 +24,7 @@
 #include "ast.h"
 #include "symtable.h"
 #include "prototype.h"
+#include "emit.h"
 
 ASTnode *PROGRAM;
 // prototying yylex to get ride of compilation waring
@@ -377,7 +378,7 @@ Compound_Stmt : '{' {LEVEL++;} Local_Declarations Statement_List '}'
 					$$ = ASTCreateNode(A_COMPOUND);
 					$$->s1 = $3;
 					$$->s2 = $4;
-					Display();
+					if(mydebug) Display();
 					// setting the maxoffset to the higher counter
 					if (OFFSET > maxoffset)
 						maxoffset = OFFSET;
@@ -918,10 +919,36 @@ Break_Continue_Stmt : T_BREAK ';'
 	;
 %%	/* end of rules, start of program */
 
-int main()
+int main(int argc, char* argv[])
 {
+	FILE *fp;
+	char s[100];
+	int i;
+	//read our input arugments
+	// option -d turn on debug
+	// option -o next arugment is out output file name
+	
+	for(i =0;i<argc;i++){
+		if(strcmp(argv[i], "-d")==0){
+			mydebug = 1;
+		}
+		if(strcmp(argv[i], "-o")==0){
+			// we have a file input
+			strcpy(s, argv[i+1]);
+			strcat(s, ".asm");
+			if(mydebug) printf("File name is %s\n", s);
+		}
+	}
+
+	// open the file that is referenced by s 
+	fp = fopen(s, "w");
+	if (fp == NULL){
+		printf("can not open file %s\n",s);
+		exit(1);
+	}
+
 	yyparse();
-	printf("\nFinished Parsing\n\n\n");
+	if(mydebug) printf("\nFinished Parsing\n\n\n");
 
 	// Function can be prototyped and may not be called at all, thats fine
 	// However if a prototyped with no declaration can be found in called function list, we need to barf here
@@ -938,7 +965,9 @@ int main()
 		}
 	}
 
-	Display();  // show global varaible functions
-	printf("\n\nAST PRINT\n\n");
-	ASTprint(0, PROGRAM);
+	if(mydebug) Display();  // show global varaible functions
+	if(mydebug) printf("\n\nAST PRINT\n\n");
+	if(mydebug) ASTprint(0, PROGRAM);
+
+	EMIT(PROGRAM, fp);
 }
