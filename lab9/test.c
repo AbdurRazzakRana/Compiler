@@ -1,5 +1,7 @@
-int f(int x);
+int x;
+int A[100];
 
-int g(void)
-  { f(3);
-  }
+int main(void){
+  write "hello";
+  write "world";
+}

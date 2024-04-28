@@ -6,6 +6,8 @@
 // #ifdef EMIT_H
 // #define EMIT_H
 #include "ast.h"
+#define WSIZE 4
+#define LOG_WSIZE 2
 void EMIT_GLOBALS(ASTnode* p, FILE* fp);
 void EMIT(ASTnode* p, FILE* fp);
 // #endif
