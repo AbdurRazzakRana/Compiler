@@ -11,13 +11,11 @@
 
 int GTEMP_LABEL=0;  /* Global Temp counter */
 
-// PRE:   Assume one up global variable GTEMP
+// PRE:   Assume one up global variable GTEMP_LABEL
 // POST:  Returns string with the format _t%d and increments the global vairbal
 // USAGE:   creates a variable name that is used to hold temporary, intermediate
 //         values in the runtime enviroment
-
-char * CreateTempLabel()
-{    
+char * CreateTempLabel() {
  char hold[100];
  char *s;
  sprintf(hold,"_L%d",GTEMP_LABEL++);
@@ -64,18 +62,83 @@ void emit_function(ASTnode * p, FILE *fp){
  }
 }
 
+// PRE: PTR to ASTNode A_VAR
+// POST: $a0 has exact memory location (L-value) of VAR
+void emit_var(ASTnode * p, FILE *fp){
+ char s[100];
+ //Task: handle internal offset if array
+
+ if (p->symbol->level == 0){  //global variable
+  sprintf(s, "la $a0, %s", p->name);  // get the direct access of global variable
+  emit(fp, "", s, "EMIT Var global variable");
+ }
+ else {  //local variable
+  // stack pointer plus offset
+
+ }
+} // end of emit_read
+
+
+// PRE: PTR to ASTNode A_READ
+// POST: MIPS code to read in a value and place it in the VAR of READ
+void emit_read(ASTnode * p, FILE *fp){
+ char s[100];
+ emit_var(p->s1, fp); // $a0 will be the location of the variable
+ emit(fp, "", "li $v0, 5", "about to read in value");
+ emit(fp, "", "syscall", "read in value $v0 now has the read in value");
+ emit(fp, "", "sw $v0, ($a0)", "store read in vlaue to memory");
+ fprintf(fp, "\n\n");
+ 
+} // end of emit_read
+
 
 // PRE: PTR to ASTNode A_WRITE
 // POST: MIPS code in fp
 // This funciton will write asm code for a write operation
 void emit_write(ASTnode * p, FILE *fp){
  char s[100];
- sprintf(s ,"la $a0, %s", p->label);
- emit(fp, "", s, "The string address");
- emit(fp, "", "li $v0, 4", "About to print a string");
- emit(fp, "", "syscall", "Call write string");
- fprintf(fp, "\n\n");
+ if(p->name != NULL){
+  // load address with the label and call print string
+  sprintf(s ,"la $a0, %s", p->label);
+  emit(fp, "", s, "The string address");
+  emit(fp, "", "li $v0, 4", "About to print a string");
+  emit(fp, "", "syscall", "Call write string");
+  fprintf(fp, "\n\n");
+ }
+ else {
+  emit_expr(p->s1, fp); // for the T_NUM expression and $a0 has the expression value
+  emit(fp, "", "li $v0, 1", "About to print a Number");
+  emit(fp, "", "syscall", "Call write number");
+  fprintf(fp, "\n\n");
+ }
 } // end of emit_write
+
+
+// PRE: PTR to a family of expressions
+// POST: MIPS code in fp
+// This funciton will write asm code for a expression operation
+void emit_expr(ASTnode * p, FILE *fp){
+ char s[100];
+ switch (p->type)
+ {
+ case A_NUM:
+  sprintf(s, "li $a0, %d", p->value);
+  emit(fp, "", s, "Expression is a constant");
+  return;
+  break;
+
+ case A_VARUSE:
+  emit_var(p, fp);  // $a0 is the memory location
+  emit(fp, "", "lw $a0 , ($a0)", "Expression is a VAR");
+  return;
+  break;
+ 
+ default:
+  printf("emit_expr switch NEVER SHOULD BE HERE\n");
+  exit(1);
+  break;
+ }
+} // end of emit_expr
 
 
 // PRE: PTR to AST, PTR to FILE
@@ -129,6 +192,17 @@ void EMIT_AST(ASTnode* p, FILE* fp){
  case A_WRITE:  
   emit_write(p, fp);  // deal with using write helper function
   EMIT_AST(p->next, fp);  // write is only next connected
+  break;
+
+ case A_EXPR:
+  emit_expr(p, fp);  // helper function to print on asm for expression
+  EMIT_AST(p->s1, fp);  // Additive expression
+  EMIT_AST(p->s2, fp);  // term or simple_expression
+  break;
+
+  case A_READ:
+  emit_read(p, fp);  // helper function to print read
+  EMIT_AST(p->next, fp);  // read is only next connected
   break;
 
  default:
