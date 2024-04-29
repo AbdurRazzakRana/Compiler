@@ -28,7 +28,39 @@ char * CreateTempLabel()
 // PRE: PTR to ASTNode A_FUNCTIONDEC
 // POST: MIPS code in fp
 void emit_function(ASTnode * p, FILE *fp){
+ char s[100];
  emit(fp, p->name, "", "function definition");
+
+ // Carve out the stack for activation record
+ emit(fp, "", "move $b0, $sp", "Activation Record Carve out copy SP");
+ sprintf(s,"subi $b0, $b0, %d", p->symbol->offset*WSIZE);
+ emit(fp, "", s, "Activation Record carve out copy size of function");
+ emit(fp, "", "sw $ra, ($b0)", "Store Return address ");
+ sprintf(s, "sq $sp %d($b0)", WSIZE);
+ emit(fp, "", s, "Store the old Stack pointer");
+ emit(fp, "", "move $sp, $b0", "Make SP the current activation record");
+ fprintf(fp, "\n\n");
+ // copy the parameters to the formal from registers $t0 et
+ // generate the compound statement
+ // create an implicit return depending on if we are main or not
+
+
+ // restore RA and SP before we return
+ // lw $ra ($sp)
+ // lw $sp $($sp)
+ emit(fp, "", "lw $ra ($sp)", "restore old environment RA");
+ sprintf(s, "lw, $sp %d($sp)",  WSIZE);
+ emit(fp, "", s, "Return from function store SP");
+ fprintf(fp, "\n");
+
+ if (strcmp(p->name, "main") == 0){ // exit the system
+  emit(fp, "", "li $v0 10", "Exit from Main, we are done");
+  emit(fp, "", "syscall", "Exit everything");
+
+ }
+ else { // jump back to caller
+
+ }
 }
 
 

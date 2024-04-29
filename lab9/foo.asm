@@ -11,3 +11,15 @@ A: .space 400 # global varaible
 .text
 
 main:			# function definition
+	move $b0, $sp		# Activation Record Carve out copy SP
+	subi $b0, $b0, 8		# Activation Record carve out copy size of function
+	sw $ra, ($b0)		# Store Return address 
+	sq $sp 4($b0)		# Store the old Stack pointer
+	move $sp, $b0		# Make SP the current activation record
+
+
+	lw $ra ($sp)		# restore old environment RA
+	lw, $sp 4($sp)		# Return from function store SP
+
+	li $v0 10		# Exit from Main, we are done
+	syscall		# Exit everything

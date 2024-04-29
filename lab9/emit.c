@@ -7,6 +7,7 @@
 #include<string.h>
 #include "ast.h"
 #include "emit_private.h"
+#include "emit.h"
 
 // PRE: possible label, command and comment
 // POST: formatted output the file
