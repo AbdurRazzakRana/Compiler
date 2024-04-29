@@ -42,6 +42,7 @@ void emit_function(ASTnode * p, FILE *fp){
  fprintf(fp, "\n\n");
  // copy the parameters to the formal from registers $t0 et
  // generate the compound statement
+ EMIT_AST(p->s2, fp);
  // create an implicit return depending on if we are main or not
 
 
@@ -64,6 +65,19 @@ void emit_function(ASTnode * p, FILE *fp){
 }
 
 
+// PRE: PTR to ASTNode A_WRITE
+// POST: MIPS code in fp
+// This funciton will write asm code for a write operation
+void emit_write(ASTnode * p, FILE *fp){
+ char s[100];
+ sprintf(s ,"la $a0, %s", p->label);
+ emit(fp, "", s, "The string address");
+ emit(fp, "", "li $v0, 4", "About to print a string");
+ emit(fp, "", "syscall", "Call write string");
+ fprintf(fp, "\n\n");
+} // end of emit_write
+
+
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
 void EMIT_GLOBALS(ASTnode* p, FILE* fp){
@@ -71,7 +85,6 @@ void EMIT_GLOBALS(ASTnode* p, FILE* fp){
   || p->type == A_FUNCTION_PROTO 
   || p->type == A_FUNCTIONDEC) 
   return;
- printf("%s %d\n", p->name, p->my_data_type);
  fprintf(fp, "%s: .space %d # global varaible\n", p->name, p->symbol->mysize * WSIZE);
  EMIT_GLOBALS(p->next, fp);
 }
@@ -83,7 +96,9 @@ void EMIT_GLOBALS(ASTnode* p, FILE* fp){
 void EMIT_STRINGS(ASTnode* p, FILE* fp){
  if(p == NULL) return;
  if(p->type == A_WRITE && p->name != NULL){
-  fprintf(fp,"%s: .asciiz    \%s \n", CreateTempLabel(), p->name);
+  p->label = CreateTempLabel();
+  
+  fprintf(fp,"%s: .asciiz    \%s \n", p->label, p->name);
  }
  EMIT_STRINGS(p->s1, fp);
  EMIT_STRINGS(p->s2, fp);
@@ -106,7 +121,16 @@ void EMIT_AST(ASTnode* p, FILE* fp){
   EMIT_AST(p->next, fp);  // functions are next connected
   break;
 
- 
+ case A_COMPOUND:  // no action for s1 vardec already in stack size
+  EMIT_AST(p->s2, fp); // statements
+  EMIT_AST(p->next, fp);  // compounds may has next compound
+  break;
+
+ case A_WRITE:  
+  emit_write(p, fp);  // deal with using write helper function
+  EMIT_AST(p->next, fp);  // write is only next connected
+  break;
+
  default:
   printf("EMIT_AST case %d not implemented\n", p->type);
   printf("WE SHOULD NEVER BE HERE\n");

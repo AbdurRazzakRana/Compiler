@@ -80,6 +80,7 @@ typedef struct ASTnodetype
  struct ASTnodetype *s1, *s2, *next; /* used for holding next pointers such as IF and WHILE
  components*/
  struct SymbTab *symbol;  // Added symbol field to keep track of item in symbol table
+ char* label;  // for lab9 only, to keep track of label in data space.
 } ASTnode;
 /* uses malloc to create an ASTnode and passes back the heap address of the newley
 created node */

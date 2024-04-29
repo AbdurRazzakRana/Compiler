@@ -18,6 +18,16 @@ main:			# function definition
 	move $sp, $a1		# Make SP the current activation record
 
 
+	la $a0, _L0		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# Call write string
+
+
+	la $a0, _L1		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# Call write string
+
+
 	lw $ra ($sp)		# restore old environment RA
 	lw, $sp 4($sp)		# Return from function store SP
 
