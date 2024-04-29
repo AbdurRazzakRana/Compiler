@@ -11,11 +11,11 @@ A: .space 400 # global varaible
 .text
 
 main:			# function definition
-	move $b0, $sp		# Activation Record Carve out copy SP
-	subi $b0, $b0, 8		# Activation Record carve out copy size of function
-	sw $ra, ($b0)		# Store Return address 
-	sq $sp 4($b0)		# Store the old Stack pointer
-	move $sp, $b0		# Make SP the current activation record
+	move $a1, $sp		# Activation Record Carve out copy SP
+	subi $a1, $a1, 8		# Activation Record carve out copy size of function
+	sw $ra, ($a1)		# Store Return address 
+	sw $sp 4($a1)		# Store the old Stack pointer
+	move $sp, $a1		# Make SP the current activation record
 
 
 	lw $ra ($sp)		# restore old environment RA
