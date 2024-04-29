@@ -25,6 +25,12 @@ char * CreateTempLabel()
  return (s);
 }
 
+// PRE: PTR to ASTNode A_FUNCTIONDEC
+// POST: MIPS code in fp
+void emit_function(ASTnode * p, FILE *fp){
+ emit(fp, p->name, "", "function definition");
+}
+
 
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
@@ -50,4 +56,29 @@ void EMIT_STRINGS(ASTnode* p, FILE* fp){
  EMIT_STRINGS(p->s1, fp);
  EMIT_STRINGS(p->s2, fp);
  EMIT_STRINGS(p->next, fp);
+}
+
+
+//PRE: PTR to ASTnode or NULL
+//POST: MIPS code into the file for the tree
+void EMIT_AST(ASTnode* p, FILE* fp){
+ if(p == NULL) return;
+ switch (p->type)
+ {
+ case A_VARDEC: // no real action
+  EMIT_AST(p->next, fp);
+  break;
+ 
+ case A_FUNCTIONDEC:
+  emit_function(p,fp);
+  EMIT_AST(p->next, fp);  // functions are next connected
+  break;
+
+ 
+ default:
+  printf("EMIT_AST case %d not implemented\n", p->type);
+  printf("WE SHOULD NEVER BE HERE\n");
+  break;
+ } // end of swtich
+
 }

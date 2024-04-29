@@ -9,3 +9,5 @@ x: .space 4 # global varaible
 A: .space 400 # global varaible
 
 .text
+
+main:			# function definition

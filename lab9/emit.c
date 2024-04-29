@@ -8,6 +8,27 @@
 #include "ast.h"
 #include "emit_private.h"
 
+// PRE: possible label, command and comment
+// POST: formatted output the file
+void emit(FILE * fp, char* label, char* command, char* comment){
+ if (strcmp("", comment) == 0){
+  if(strcmp("", label) == 0){
+   fprintf(fp, "\t%s\t\t\n", command);
+  }
+  else {
+   fprintf(fp, "%s:\t%s\t\t\n", label, command);
+  }
+ }
+ else {
+  if(strcmp("", label) == 0){
+   fprintf(fp, "\t%s\t\t# %s\n", command, comment);
+  }
+  else {
+   fprintf(fp, "%s:\t%s\t\t# %s\n", label, command, comment);
+  }
+ }
+}
+
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
 void EMIT(ASTnode* p, FILE* fp){
@@ -18,6 +39,6 @@ void EMIT(ASTnode* p, FILE* fp){
  EMIT_STRINGS(p,fp);
  fprintf(fp, "\n.align 2\n");
  EMIT_GLOBALS(p, fp);
- fprintf(fp, "\n.text\n");
- // EMIT_AST(p, fp);
+ fprintf(fp, "\n.text\n\n");
+ EMIT_AST(p, fp);
 }

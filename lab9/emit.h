@@ -10,4 +10,5 @@
 #define LOG_WSIZE 2
 void EMIT_GLOBALS(ASTnode* p, FILE* fp);
 void EMIT(ASTnode* p, FILE* fp);
+void emit(FILE * fp, char* label, char* command, char* comment);
 // #endif
