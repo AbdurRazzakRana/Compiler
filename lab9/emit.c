@@ -40,6 +40,9 @@ void EMIT(ASTnode* p, FILE* fp){
  EMIT_STRINGS(p,fp);
  fprintf(fp, "\n.align 2\n");
  EMIT_GLOBALS(p, fp);
- fprintf(fp, "\n.text\n\n");
+ fprintf(fp, ".text\n\n");
+ fprintf(fp, ".globl main\n\n");
+
+ 
  EMIT_AST(p, fp);
 }

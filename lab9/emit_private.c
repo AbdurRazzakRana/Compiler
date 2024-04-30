@@ -37,7 +37,7 @@ void emit_function(ASTnode * p, FILE *fp){
  sprintf(s, "sw $sp %d($a1)", WSIZE);
  emit(fp, "", s, "Store the old Stack pointer");
  emit(fp, "", "move $sp, $a1", "Make SP the current activation record");
- fprintf(fp, "\n\n");
+ fprintf(fp, "\n");
  // copy the parameters to the formal from registers $t0 et
  // generate the compound statement
  EMIT_AST(p->s2, fp);
@@ -47,6 +47,7 @@ void emit_function(ASTnode * p, FILE *fp){
  // restore RA and SP before we return
  // lw $ra ($sp)
  // lw $sp $($sp)
+ emit(fp, "", "li $a0, 0", "RETURN has no specified value set to 0");
  emit(fp, "", "lw $ra ($sp)", "restore old environment RA");
  sprintf(s, "lw, $sp %d($sp)",  WSIZE);
  emit(fp, "", s, "Return from function store SP");
@@ -60,6 +61,9 @@ void emit_function(ASTnode * p, FILE *fp){
  else { // jump back to caller
 
  }
+ sprintf(s, "END OF FUNCTION %s",  p->name);
+ emit(fp, "", "", s);
+ fprintf(fp, "\n");
 }
 
 // PRE: PTR to ASTNode A_VAR
@@ -144,11 +148,14 @@ void emit_expr(ASTnode * p, FILE *fp){
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
 void EMIT_GLOBALS(ASTnode* p, FILE* fp){
- if(p == NULL 
-  || p->type == A_FUNCTION_PROTO 
-  || p->type == A_FUNCTIONDEC) 
-  return;
- fprintf(fp, "%s: .space %d # global varaible\n", p->name, p->symbol->mysize * WSIZE);
+ if(p == NULL) return;   // return when p is null
+ if (p->type == A_FUNCTION_PROTO 
+  || p->type == A_FUNCTIONDEC){
+   // do nothing when its function dec or prototype,
+   //do not return to show variables afterwords
+  }   
+ else   //its a global varialbe
+  fprintf(fp, "%s: .space %d # global varaible\n", p->name, p->symbol->mysize * WSIZE);
  EMIT_GLOBALS(p->next, fp);
 }
 
