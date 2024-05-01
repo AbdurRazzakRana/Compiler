@@ -70,10 +70,16 @@ void emit_function(ASTnode * p, FILE *fp){
 void emit_var(ASTnode * p, FILE *fp){
  char s[100];
  //Task: handle internal offset if array
- // if (p->s1 != NULL){
- //  emit_expr(p->s1, fp);
- //  sprintf(s, "si $a1 ")
- // }
+ printf("emit_var\n");
+ printStructure(p);
+ if (p->s1 != NULL){  // variable is an array
+  emit_expr(p->s1, fp);  // a0 has the expression
+  printf("emit_var: index expr calculated\n");
+  emit(fp,"", "move $a1, $a0", "VAR copy index array in a1");
+  // sprintf(s, "sll $a1 $a1 %d", p->s1->value);
+  sprintf(s, "sll $a1 $a1 2");
+  emit(fp,"", s, "Muliply the index by wordszie via SLL");
+ }
 
  if (p->symbol->level == 0){  //global variable
   sprintf(s, "la $a0, %s", p->name);  // get the direct access of global variable
@@ -84,6 +90,10 @@ void emit_var(ASTnode * p, FILE *fp){
   emit(fp, "", "move $a0 $sp", "VAR local make a copy of stackpointer");
   sprintf(s, "addi $a0 $a0 %d", p->symbol->offset * WSIZE);
   emit(fp, "", s, "VAR local stack pointer plus offset");
+
+  if (p->s1 != NULL){ // need to add additional offset for array
+   emit(fp, "", "add $a0 $a0 $a1", "VAR array add internal offset");
+  }
  }
 } // end of emit_read
 

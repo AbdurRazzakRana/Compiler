@@ -1,6 +1,7 @@
-// program reads in several values and
-// the prints the square of them out
 void main(void) {
-  int x;
-  x = 10;
+  int x[20];
+  int i;
+   i=100;
+  x[13] = i;
+  write(x[13]);
 }
