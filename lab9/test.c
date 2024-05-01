@@ -1,12 +1,6 @@
-int x;
-int main(void){
-  write "hello\n";
-  write 123;
-  write "\n";
-  write "enter number ";
-  read x;
-  write "you entered: ";
-  write x;
-  write "\n";
+// program reads in several values and
+// the prints the square of them out
+void main(void) {
+  int x;
+  x = 10;
 }
-int y[100];

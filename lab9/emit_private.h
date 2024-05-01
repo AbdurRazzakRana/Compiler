@@ -14,3 +14,5 @@ void emit_function(ASTnode * p, FILE *fp);  // helper function to print function
 void emit_write(ASTnode * p, FILE *fp);  // helper function to write the write statements into asm
 void emit_read(ASTnode * p, FILE *fp); // helper function for read
 void emit_var(ASTnode * p, FILE *fp); // helper function for var
+void emit_assign(ASTnode * p, FILE *fp); // helper function for assignment statement
+void printStructure(ASTnode* p);
