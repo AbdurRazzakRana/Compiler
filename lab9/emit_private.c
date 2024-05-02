@@ -200,60 +200,64 @@ void emit_expr(ASTnode * p, FILE *fp){
    case A_PLUS:
     emit(fp, "", "add $a0, $a0, $a1", "Add Expression and keeping value in a0");
     return;
-   // case A_MINUS:
-    
-   //  return;
+   case A_MINUS:
+    emit(fp, "", "sub $a0, $a0, $a1", "Subtraction Expression and keeping value in a0");
+    return;
 
-   // case A_DEVIDE:
-    
-   //  return;
-   // case A_TIMES:
-    
-   //  return;
-   //  break;
+   case A_TIMES:
+    emit(fp, "", "mult $a0 $a1", "Multiply Expression");
+    emit(fp, "", "mflo $a0", "Setting low 32 bits into a0 after multiply");
+    return;
 
-   // case A_MOD:
-    
-   //  return;
-   //  break;
-   // case A_LESSEQUAL:
-    
-   //  return;
-   //  break;
+   case A_DEVIDE:
+    emit(fp, "", "div $a0 $a1", "Devide Expression");
+    emit(fp, "", "mflo $a0", "Setting low 32 bits into a0 after devide");
+    return;
+
+   case A_MOD:
+    emit(fp, "", "div $a0 $a1", "Mod Expression, devide first");
+    emit(fp, "", "mfhi $a0", "Among the 64 bits, high 32 keeps the reminder");
+    return;
+
+   case A_LESSEQUAL:
+    emit(fp, "", "add $a1, $a1, 1", "Less Than Equal Expr, incrementing RHS by one");
+    emit(fp, "", "slt $a0, $a0, $a1", "Now check is the LHS is less than RHS");
+    return;
    
    case A_LESSTHAN:
     emit(fp, "", "slt $a0, $a0, $a1", "Expression Less Than");
     return;
-    break;
 
-   // case A_GREATERTHAN:
-    
-   //  return;
-   //  break;
-   // case A_GREATEREQUAL:
-    
-   //  return;
-   //  break;
+   case A_GREATERTHAN:
+    emit(fp, "", "slt $a0, $a1, $a0", "Greater Than check is same chekcing LT reverse");
+    return;
 
-   // case A_EQUAL:
-    
-   //  return;
-   //  break;
+   case A_GREATEREQUAL:
+    emit(fp, "", "add $a1, $a1, 1", "Greater Than Equal Expr, incrementing RHS by one");
+    emit(fp, "", "slt $a0, $a1, $a0", "Now check is the RHS is less than LHS");
+    return;
+
+   case A_EQUAL:
+    emit(fp, "", "slt $t0, $a0, $a1", "To check equal, taking less than of a0<a1");
+    emit(fp, "", "slt $t1, $a1, $a0", "Now check a1<a0 and store another temp var");
+    emit(fp, "", "nor $a0, $t0, $t1", "Nor gate will show the proper output");
+    emit(fp, "", "andi $a0, 1", "And to make sure the answer value is only 1 at 0th index");
+    return;
    
-   // case A_NOTEQUAL:
-    
-   //  return;
-   //  break;
+   case A_NOTEQUAL:
+    emit(fp, "", "slt $t0, $a0, $a1", "To check equal, taking less than of a0<a1");
+    emit(fp, "", "slt $t1, $a1, $a0", "Now check a1<a0 and store another temp var");
+    emit(fp, "", "or $a0, $t0, $t1", "Nor gate will show the proper output");
+    emit(fp, "", "andi $a0, 1", "And to make sure the answer value is only 1 at 0th index");
+    return;
 
-   
    default:
     printf("EXPRESSION OPERATION NOT WRITTEN YET, ASAP FIX\n");
     exit(1);
     return;
     break;
     
-   } 
-
+   }
   }
   return;
   break;
