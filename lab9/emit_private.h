@@ -16,4 +16,5 @@ void emit_read(ASTnode * p, FILE *fp); // helper function for read
 void emit_var(ASTnode * p, FILE *fp); // helper function for var
 void emit_assign(ASTnode * p, FILE *fp); // helper function for assignment statement
 void emit_while(ASTnode * p, FILE *fp); // helper function for while loop
+void emit_if(ASTnode * p, FILE *fp);  //helper funcction for if else
 void printStructure(ASTnode* p);

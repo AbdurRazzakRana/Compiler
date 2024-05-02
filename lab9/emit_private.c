@@ -245,9 +245,9 @@ void emit_expr(ASTnode * p, FILE *fp){
     return;
    
    case A_NOTEQUAL:
-    emit(fp, "", "slt $t0, $a0, $a1", "To check equal, taking less than of a0<a1");
+    emit(fp, "", "slt $t0, $a0, $a1", "To check NOT equal, taking less than of a0<a1");
     emit(fp, "", "slt $t1, $a1, $a0", "Now check a1<a0 and store another temp var");
-    emit(fp, "", "or $a0, $t0, $t1", "Nor gate will show the proper output");
+    emit(fp, "", "or $a0, $t0, $t1", "OR gate will show the result of Not Equal");
     emit(fp, "", "andi $a0, 1", "And to make sure the answer value is only 1 at 0th index");
     return;
 
@@ -329,6 +329,35 @@ void emit_while(ASTnode * p, FILE *fp){  // p is not null for sure
  printf("WHILE ENCHELADA end\n");
 } // end of emit_while
 
+
+// PRE: PTR to ASTNode A_IF
+// POST: MIPS code to perform if else condition
+void emit_if(ASTnode * p, FILE *fp){  // As the p is A_IF, it is not NULL
+ char s[100];
+ char elsebody[100];
+ char endif[100];
+
+ sprintf(elsebody,"%s", CreateTempLabel());
+ sprintf(endif,"%s", CreateTempLabel());
+ emit_expr(p->s1, fp);  // for expression condition, a0 has the branch deciding value
+ sprintf(s ,"beq $a0 $0 %s",elsebody);
+ emit(fp, "", s, "IF branch decision, taken to else condidion or continue to if body");
+ EMIT_AST(p->s2->s1, fp);  // for the if statement
+ sprintf(s, "j %s", endif);
+ emit(fp, "", s, "As else is not taken, jump to loop end");
+
+ sprintf(s, "%s:", elsebody);
+ fprintf(fp, "%s\t\t#Else target level if the branch is taken\n", s);  // printing directly to maintain indentation
+ if (p->s2->s2 != NULL){  // check if else statement exist
+  EMIT_AST(p->s2->s2, fp);  // for else statement
+ }
+
+ sprintf(s, "%s:", endif);
+ fprintf(fp, "%s\t\t# End of If Scope\n", s);  // printing directly to maintain indentation
+
+} // end of emit_read
+
+
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
 void EMIT_GLOBALS(ASTnode* p, FILE* fp){
@@ -404,6 +433,10 @@ void EMIT_AST(ASTnode* p, FILE* fp){
   case A_WHILE_STAT:
    emit_while(p, fp);
    EMIT_AST(p->next, fp); // while is next connected
+   break;
+
+  case A_IF:
+   emit_if(p, fp);
    break;
 
   default:
