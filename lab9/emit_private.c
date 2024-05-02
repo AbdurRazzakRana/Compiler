@@ -23,6 +23,32 @@ char * CreateTempLabel() {
  return (s);
 }
 
+// PRE:   ASTnode
+// POST:  priniting the items of the box, will be remain same after the printing
+void printStructure(ASTnode* p){
+ printf("\n");
+ if (p==NULL) {
+  printf("p is null\n");
+  return;
+ }
+ printf("p name: %s\n", p->name);
+ printf("p type: %d\n", p->type);
+ printf("p operator: %d\n", p->operator);
+ printf("p data type: %d\n", p->my_data_type);
+ printf("p s1: %d\n", p->s1 == NULL ? 0: 1);
+ printf("p s2: %d\n", p->s2 == NULL ? 0: 1);
+ printf("p next: %d\n", p->next == NULL ? 0: 1);
+ printf("p value: %d\n", p->value);
+ printf("p symbol: %d\n", p->symbol == NULL ? 0: 1);
+ 
+ if(p->symbol != NULL){
+  printf("p symbol name: %s\n", p->symbol->name);
+  printf("p symbol offset: %d\n", p->symbol->offset);
+  printf("p symbol subType: %d\n", p->symbol->SubType);
+ }
+ printf("\n");
+}
+
 // PRE: PTR to ASTNode A_FUNCTIONDEC
 // POST: MIPS code in fp
 void emit_function(ASTnode * p, FILE *fp){
@@ -95,7 +121,7 @@ void emit_var(ASTnode * p, FILE *fp){
    emit(fp, "", "add $a0 $a0 $a1", "VAR array add internal offset");
   }
  }
-} // end of emit_read
+} // end of emit_var
 
 
 // PRE: PTR to ASTNode A_READ
@@ -138,6 +164,7 @@ void emit_write(ASTnode * p, FILE *fp){
 // This funciton will write asm code for a expression operation
 void emit_expr(ASTnode * p, FILE *fp){
  char s[100];
+ printStructure(p);
  switch (p->type)
  {
  case A_NUM:
@@ -151,6 +178,85 @@ void emit_expr(ASTnode * p, FILE *fp){
   emit(fp, "", "lw $a0, ($a0)", "Expression is a VAR");
   return;
   break;
+ case A_EXPR:
+  printf("Expression\n");
+  if(p->operator == A_UNIRY_MINUS){ // handle unary minus case
+
+  }
+  else {  //other regular case
+   emit_expr(p->s1, fp);  // a0 pointing to exact mem location
+   sprintf(s, "sw $a0, %d($sp)", p->symbol->offset * WSIZE);
+   emit(fp, "", s, "LHS of expression stored into temp memory");
+   emit_expr(p->s2, fp); // for RHS simple expression or term, a0 holds the mem location
+   
+   // at this moment we have both LHS AND RHS, now load them into two registers
+   emit(fp, "", "move $a1, $a0", "RHS on a1");
+   sprintf(s, "lw $a0, %d($sp)", p->symbol->offset * WSIZE);
+   emit(fp, "", s, "Getting LHS into a0 from mem");
+
+   // no we have LHS in a0, OPERATOR, RHS in a1
+   switch (p->operator)
+   {
+   case A_PLUS:
+    emit(fp, "", "add $a0, $a0, $a1", "Add Expression and keeping value in a0");
+    return;
+   // case A_MINUS:
+    
+   //  return;
+
+   // case A_DEVIDE:
+    
+   //  return;
+   // case A_TIMES:
+    
+   //  return;
+   //  break;
+
+   // case A_MOD:
+    
+   //  return;
+   //  break;
+   // case A_LESSEQUAL:
+    
+   //  return;
+   //  break;
+   
+   case A_LESSTHAN:
+    emit(fp, "", "slt $a0, $a0, $a1", "Expression Less Than");
+    return;
+    break;
+
+   // case A_GREATERTHAN:
+    
+   //  return;
+   //  break;
+   // case A_GREATEREQUAL:
+    
+   //  return;
+   //  break;
+
+   // case A_EQUAL:
+    
+   //  return;
+   //  break;
+   
+   // case A_NOTEQUAL:
+    
+   //  return;
+   //  break;
+
+   
+   default:
+    printf("EXPRESSION OPERATION NOT WRITTEN YET, ASAP FIX\n");
+    exit(1);
+    return;
+    break;
+    
+   } 
+
+  }
+  return;
+  break;
  
  default:
   printf("emit_expr switch NEVER SHOULD BE HERE\n");
@@ -158,27 +264,6 @@ void emit_expr(ASTnode * p, FILE *fp){
   break;
  }
 } // end of emit_expr
-
-void printStructure(ASTnode* p){
- printf("\n");
- if (p==NULL) {
-  printf("p is null\n");
-  return;
- }
- printf("p name: %s\n", p->name);
- printf("p type: %d\n", p->type);
- printf("p s1: %d\n", p->s1 == NULL ? 0: 1);
- printf("p s2: %d\n", p->s2 == NULL ? 0: 1);
- printf("p next: %d\n", p->next == NULL ? 0: 1);
- printf("p value: %d\n", p->value);
- printf("p symbol: %d\n", p->symbol == NULL ? 0: 1);
- if(p->symbol != NULL){
-  printf("p symbol name: %s\n", p->symbol->name);
-  printf("p symbol offset: %d\n", p->symbol->offset);
-  printf("p symbol subType: %d\n", p->symbol->SubType);
- }
- printf("\n");
-}
 
 // PRE: PTR to ASTNode with A_ASSGN_STAT
 // POST: MIPS code for the assignment instructions into the given file
@@ -198,7 +283,47 @@ void emit_assign(ASTnode * p, FILE *fp){  // for example x = 10;
  emit(fp, "", s, "Assign get RHS temporarily");
  emit(fp, "", "sw $a1 ($a0)", "Assign the RHS into the memory of LHS");
  fprintf(fp, "\n\n");
-} // end of emit_read
+} // end of emit_assign
+
+
+// PRE: PTR to ASTNode A_WHILE_STAT
+// POST: MIPS code to write on the file
+void emit_while(ASTnode * p, FILE *fp){  // p is not null for sure
+ char s[100];
+ char loopin[100];
+ char loopout[100];
+ printf("WHILE ENCHELADA start\n");
+
+ //sprintf(s ,"sw $a0 %d($sp)", p->symbol->offset*WSIZE);
+ //emit(fp, "", s, "Assign store RHS temporarily");
+ // Labels for the loop
+ sprintf(loopin ,"%s", CreateTempLabel());
+ sprintf(loopout ,"%s", CreateTempLabel());
+
+ // Loop will be running at least one time therefore creating first block
+ sprintf(s, "%s:", loopin);
+ fprintf(fp, "%s\t\t#While Loop START\n", s); // to ensure the indentation
+ // emit(fp, "", s, "While loop level, loop START");
+
+ emit_expr(p->s1, fp);  //expression of while condition, a0 has the value of condition
+
+ sprintf(s, "beq $a0 $0 %s", loopout);  // go to loop out level if the condition is false
+ emit(fp, "", s, "WHILE branch out taking decision");
+
+ //while body, if loopout branch not taken
+ EMIT_AST(p->s2, fp);
+
+ sprintf(s, "j %s", loopin);   //Jump to loop level again
+ emit(fp, "", s, "Jump to loop level again, loop continue");
+
+ // sprintf(s, "%s:", loopout);
+ // emit(fp, "", s, "Level of While loop END");
+
+ sprintf(s, "%s:", loopout);
+ fprintf(fp, "%s\t\t#While Loop END\n", s);  // printing directly to maintain indentation
+
+ printf("WHILE ENCHELADA end\n");
+} // end of emit_while
 
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
@@ -270,6 +395,11 @@ void EMIT_AST(ASTnode* p, FILE* fp){
   case A_ASSGN_STAT:
    emit_assign(p, fp);
    EMIT_AST(p->next, fp); // for the same level next assignment
+   break;
+
+  case A_WHILE_STAT:
+   emit_while(p, fp);
+   EMIT_AST(p->next, fp); // while is next connected
    break;
 
   default:
