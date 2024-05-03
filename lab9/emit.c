@@ -44,5 +44,6 @@ void EMIT(ASTnode* p, FILE* fp){
  fprintf(fp, ".globl main\n\n");
 
  fi = malloc(sizeof(struct FunctionInfo));
+ bci = malloc(sizeof(struct BreakContinueInfo));
  EMIT_AST(p, fp);
 }

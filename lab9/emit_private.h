@@ -15,7 +15,17 @@ struct FunctionInfo
  int isReturnStmtFound;  // burf if the function has INT return type, however no return statement found
 };
 
-struct FunctionInfo * fi;
+struct BreakContinueInfo
+{  
+// This data structure is to keep track of label to jump for break and continue
+// So that it will help to jump into the write label;
+ char * breakLevel;  //keep track of break label
+ char * continueLevel; // keep track of continue label
+};
+
+struct FunctionInfo * fi;  // pointer to FunctionInfo object
+struct BreakContinueInfo * bci;  // pointer to BreakContinueInfo object
+
 char * CreateTempLabel(); // Togenerate new Label for asm file
 void EMIT_GLOBALS(ASTnode* p, FILE* fp); // to prints global
 void EMIT_STRINGS(ASTnode* p, FILE* fp); // to prints strings on asm file
@@ -33,6 +43,7 @@ void emit_args(ASTnode * p, FILE *fp);  //helper function to generate asm code f
 void store_args_into_t(ASTnode * p, FILE *fp, int tempReigsterNumber);  // helper function to move args value into temp registers
 void emit_params(ASTnode * p, FILE *fp, int tempReigsterNumber);  // helper function to get parameter values from t0 and set them into their offset
 void emit_return(ASTnode * p, FILE *fp);  // helper function to print the return asm codes
+void emit_break(ASTnode * p, FILE *fp);  // helper function to print break asm codes
 
 void print_structure(ASTnode* p);  // print structure
 void func_name_wise_code(char * funcName, FILE* fp);  // helper function to print functionname wise code

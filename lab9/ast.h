@@ -25,7 +25,7 @@ enum ASTtype
  A_FUNCTION_COMMON, //0
  A_FUNCTIONDEC, //1  // usrd
  A_FUNCTION_PROTO, //2
- A_VARDEC, //3
+ A_VARDEC, //3  //done
  A_VARUSE, //4  // done
  A_COMPOUND, //5
  A_WRITE, //6  // done
@@ -40,8 +40,8 @@ enum ASTtype
  A_FUNC_CALL, //15
  A_ARG, //16  // done
  A_ASSGN_STAT, //17  //done
- A_RETURN_STAT, //18
- A_BREAK, //19
+ A_RETURN_STAT, //18  // done
+ A_BREAK, //19  //done
  A_CONTINUE //20
 
 };
