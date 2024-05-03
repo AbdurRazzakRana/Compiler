@@ -265,7 +265,7 @@ void emit_expr(ASTnode * p, FILE *fp){
     emit(fp, "", "li $a0, -1", "For Unary Operation, load -1 first"); // load -1 to a0
     
     sprintf(s, "sw $a0, %d($sp)", p->symbol->offset *WSIZE);
-    emit(fp, "", s, "Store -1 to the appropriate offset memory");
+    emit(fp, "", s, "Store -1 to the appropriate offset memory");   // Storing -1 into offset mem
 
     emit_expr(p->s1, fp);   // at this moment a0 has the answer
     // move a0 to a1, to keep a0 avaialble to hold the other operands which is -1 in this case 
