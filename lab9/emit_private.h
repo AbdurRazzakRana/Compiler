@@ -44,6 +44,7 @@ void store_args_into_t(ASTnode * p, FILE *fp, int tempReigsterNumber);  // helpe
 void emit_params(ASTnode * p, FILE *fp, int tempReigsterNumber);  // helper function to get parameter values from t0 and set them into their offset
 void emit_return(ASTnode * p, FILE *fp);  // helper function to print the return asm codes
 void emit_break(ASTnode * p, FILE *fp);  // helper function to print break asm codes
+void emit_continue(ASTnode * p, FILE *fp);  // helper function to print continue asm codes
 
 void print_structure(ASTnode* p);  // print structure
 void func_name_wise_code(char * funcName, FILE* fp);  // helper function to print functionname wise code

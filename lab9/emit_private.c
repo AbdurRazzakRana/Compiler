@@ -383,6 +383,7 @@ void emit_while(ASTnode * p, FILE *fp){  // p is not null for sure
  sprintf(loopin ,"%s", CreateTempLabel());
  sprintf(loopout ,"%s", CreateTempLabel());
  bci->breakLevel = loopout;  // keeping the loop exit label to break when needed
+ bci->continueLevel = loopin;  // keeping the loop in label to continue when needed
 
  // Loop will be running at least one time therefore creating first block
  sprintf(s, "%s:", loopin);
@@ -444,6 +445,14 @@ void emit_break(ASTnode * p, FILE * fp){  // p is at A_BREAK, not NULL
  sprintf(s, "j %s", bci->breakLevel);
  emit(fp, "", s, "Break the loop and jump to Loop End");
 }  // end of emit_break
+
+// PRE: PTR to ASTNode A_CONTINUE
+// POST: MIPS Code to perform continue asm lines
+void emit_continue(ASTnode * p, FILE * fp){  // p is at A_CONTINUE, not NULL
+ char s[100];
+ sprintf(s, "j %s", bci->continueLevel);
+ emit(fp, "", s, "Continue to the loop begin and skip rest part of the loop ");
+}  // end of emit_continue
 
 
 // PRE: PTR to ASTNode A_RETURN_STAT
@@ -578,6 +587,11 @@ void EMIT_AST(ASTnode* p, FILE* fp){
 
   case A_BREAK:
    emit_break(p, fp);
+   EMIT_AST(p->next, fp);  // next statement
+   break;
+
+  case A_CONTINUE:
+   emit_continue(p, fp);
    EMIT_AST(p->next, fp);  // next statement
    break;
 
