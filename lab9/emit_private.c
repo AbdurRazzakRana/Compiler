@@ -143,7 +143,12 @@ void emit_var(ASTnode * p, FILE *fp){
   emit(fp, "", s, "VAR local stack pointer plus offset");
 
   if (p->s1 != NULL){ // need to add additional offset for array
-   emit(fp, "", "add $a0 $a0 $a1", "VAR array add internal offset");
+    if (strcmp(fi->functionName, "main") != 0){
+      // Array has recieved as paramer in other function, hence needs to acess the *A address first 
+      // before looking for internal offset access 
+      emit(fp, "", "lw $a0 ($a0)", "Array address accessed as it passed as params in func");
+    }
+    emit(fp, "", "add $a0 $a0 $a1", "VAR array add internal offset");
   }
  }
 } // end of emit_var
@@ -247,13 +252,33 @@ void emit_expr(ASTnode * p, FILE *fp){
 
  case A_VARUSE:
   emit_var(p, fp);  // $a0 is the memory location
-  emit(fp, "", "lw $a0, ($a0)", "Expression is a VAR");
+  if (fi->isCallingFunc == 1 && p->symbol->SubType == SYM_ARRAY){
+    // No need to load a0 address in this case, becaseu a0 itself the address of array
+  }
+  else emit(fp, "", "lw $a0, ($a0)", "Expression is a VAR");
   return;
   break;
+
  case A_EXPR:
   // printf("Expression\n");
   if(p->operator == A_UNIRY_MINUS){ // handle unary minus case
+    emit(fp, "", "li $a0, -1", "For Unary Operation, load -1 first"); // load -1 to a0
+    
+    sprintf(s, "sw $a0, %d($sp)", p->symbol->offset *WSIZE);
+    emit(fp, "", s, "Store -1 to the appropriate offset memory");
 
+    emit_expr(p->s1, fp);   // at this moment a0 has the answer
+    // move a0 to a1, to keep a0 avaialble to hold the other operands which is -1 in this case 
+    emit(fp, "", "move $a1, $a0", "Move Right factor value into a1"); 
+
+    //load the -1 that we stored earliner into a0
+    sprintf(s, "lw $a0, %d($sp)", p->symbol->offset *WSIZE);
+    emit(fp, "", s, "Getting previously stored -1 into a0");
+
+    // Doing multiplication operation between a0 and a1
+    // And keeping the final output into a0
+    emit(fp, "", "mult $a0 $a1", "Multiply Expression");
+    emit(fp, "", "mflo $a0", "Setting low 32 bits into a0 after multiply");
   }
   else {  //other regular case
    emit_expr(p->s1, fp);  // a0 pointing to exact mem location
@@ -335,13 +360,15 @@ void emit_expr(ASTnode * p, FILE *fp){
   break;
 
   case A_FUNC_CALL:
-   emit_args(p->s1, fp);  // process the argument first before function call
-   // store them into temporary registers t
-   store_args_into_t(p->s1, fp, 0);  // move all args into appropriate temp registers
-   sprintf(s, "jal %s", p->name);  // Now ready to call the function
-   emit(fp, "", s, "Function Call");
-   fprintf(fp, "\n");
-   return;
+    fi->isCallingFunc = 1;  // scope of function call
+    emit_args(p->s1, fp);  // process the argument first before function call
+    fi->isCallingFunc = 0;
+    // store them into temporary registers t
+    store_args_into_t(p->s1, fp, 0);  // move all args into appropriate temp registers
+    sprintf(s, "jal %s", p->name);  // Now ready to call the function
+    emit(fp, "", s, "Function Call");
+    fprintf(fp, "\n");
+    return;
  
  default:
   printf("emit_expr switch NEVER SHOULD BE HERE\n");

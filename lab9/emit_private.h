@@ -11,6 +11,7 @@ struct FunctionInfo
 // This data structure is to keep track of function name and return type
 // In order to match the function name and return type at emit_return
  char * functionName;  // to generate code based on main or other function at return statement time
+ int isCallingFunc;  // keep track wheter var is call in function call to help parameter passing
 
  // function return type maching is turned off after discussing with professor
  // int returnType;  // burf if type mismatch between function return type and return statement
@@ -47,6 +48,7 @@ void emit_params(ASTnode * p, FILE *fp, int tempReigsterNumber);  // helper func
 void emit_return(ASTnode * p, FILE *fp);  // helper function to print the return asm codes
 void emit_break(ASTnode * p, FILE *fp);  // helper function to print break asm codes
 void emit_continue(ASTnode * p, FILE *fp);  // helper function to print continue asm codes
+void emit_unary_minus(ASTnode * p, FILE *fp);  //helper function to generate asm code for unary minus
 
 void print_structure(ASTnode* p);  // print structure
 void func_name_wise_code(char * funcName, FILE* fp);  // helper function to print functionname wise code
