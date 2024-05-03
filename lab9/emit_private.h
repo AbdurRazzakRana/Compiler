@@ -11,8 +11,10 @@ struct FunctionInfo
 // This data structure is to keep track of function name and return type
 // In order to match the function name and return type at emit_return
  char * functionName;  // to generate code based on main or other function at return statement time
- int returnType;  // burf if type mismatch between function return type and return statement
- int isReturnStmtFound;  // burf if the function has INT return type, however no return statement found
+
+ // function return type maching is turned off after discussing with professor
+ // int returnType;  // burf if type mismatch between function return type and return statement
+ // int isReturnStmtFound;  // burf if the function has INT return type, however no return statement found
 };
 
 struct BreakContinueInfo

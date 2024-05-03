@@ -68,8 +68,11 @@ void emit_function(ASTnode * p, FILE *fp){
  emit(fp, p->name, "", "function definition");
  
  fi->functionName = p->name;
- fi->returnType = p->my_data_type;
- fi->isReturnStmtFound = 0;
+
+ //Function reuturn type checking is turned off after discussing with professor
+//  fi->returnType = p->my_data_type;
+//  fi->isReturnStmtFound = 0;
+
  // Carve out the stack for activation record
  emit(fp, "", "move $a1, $sp", "Activation Record Carve out copy SP");
  sprintf(s,"subi $a1 $a1 %d", p->symbol->offset*WSIZE);
@@ -91,12 +94,11 @@ void emit_function(ASTnode * p, FILE *fp){
  //At this point, after the compound statnemt, if the funciton return type is INT
  // and no return statement found, should barf
  // other funciton return type mismatches are covered inside emit_return
- printf(" --> %d\n", p->my_data_type);
- printf(" --> %d\n", fi->isReturnStmtFound);
- if(!fi->isReturnStmtFound && p->my_data_type == A_INTTYPE){
-  printf("BARF: Function %s should return an INT, NO RETURN STMT FOUND\n", p->name);
-  exit(1);
- }
+ // return type checking is off
+//  if(!fi->isReturnStmtFound && p->my_data_type == A_INTTYPE){
+//   printf("BARF: Function %s should return an INT, NO RETURN STMT FOUND\n", p->name);
+//   exit(1);
+//  }
  
  // create an implicit return depending on if we are main or not
 
@@ -123,7 +125,7 @@ void emit_var(ASTnode * p, FILE *fp){
  // printStructure(p);  //debug prints
  if (p->s1 != NULL){  // variable is an array
   emit_expr(p->s1, fp);  // a0 has the expression
-  printf("emit_var: index expr calculated\n");
+  // printf("emit_var: index expr calculated\n");
   emit(fp,"", "move $a1, $a0", "VAR copy index array in a1");
   // sprintf(s, "sll $a1 $a1 %d", p->s1->value);
   sprintf(s, "sll $a1 $a1 2");
@@ -465,22 +467,25 @@ void emit_return(ASTnode * p, FILE *fp){  // As the p is A_RETURN_STAT box, it i
  emit(fp, "", "", "Return Statement explicitely mentioned");
 
  if (p->s1 == NULL){  //return without any expression, return;
-  if (fi->returnType == A_INTTYPE){
-   printf("BURF: Return type mismatch in Function %s!!\n", fi->functionName);
-   exit(1);
-  }
-  fi->isReturnStmtFound = 0;
+  // return type chekcing off 
+  // if (fi->returnType == A_INTTYPE){
+  //  printf("BURF: Return type mismatch in Function %s!!\n", fi->functionName);
+  //  exit(1);
+  // }
+  // fi->isReturnStmtFound = 0;
+  
   emit(fp, "", "li $a0, 0", "RETURN has no specified value set to 0");
   emit(fp, "", "lw $ra ($sp)", "restore old environment RA");
   sprintf(s, "lw $sp %d($sp)",  WSIZE);
   emit(fp, "", s, "Return from function store SP");
   fprintf(fp, "\n");
  } else{  // return has an expression
-   if (fi->returnType != p->s1->my_data_type){
-    printf("BURF: Return type mismatch in Function %s!!\n", fi->functionName);
-    exit(1);
-   }
-   fi->isReturnStmtFound = 1;
+  // Return type checking off
+  //  if (fi->returnType != p->s1->my_data_type){
+  //   printf("BURF: Return type mismatch in Function %s!!\n", fi->functionName);
+  //   exit(1);
+  //  }
+  //  fi->isReturnStmtFound = 1;
    emit_expr(p->s1, fp);
 
    emit(fp, "", "lw $ra ($sp)", "Load the old environment RA");
