@@ -25,7 +25,7 @@ char * CreateTempLabel() {
 
 // PRE:   ASTnode
 // POST:  priniting the items of the box, will be remain same after the printing
-void printStructure(ASTnode* p){
+void print_structure(ASTnode* p){
  printf("\n");
  if (p==NULL) {
   printf("p is null\n");
@@ -49,12 +49,27 @@ void printStructure(ASTnode* p){
  printf("\n");
 }
 
+// PRE: Function name
+// POST: Generate machine code based on it is main or not
+void func_name_wise_code(char * funcName, FILE *fp){
+  if (strcmp(funcName, "main") == 0){ // exit the system
+  emit(fp, "", "li $v0, 10", "Exit from Main, we are done");
+  emit(fp, "", "syscall", "Exit everything");
+
+ }
+ else { // jump back to caller
+  emit(fp, "", "jr $ra", "Jump to the caller address");
+ }
+}
 // PRE: PTR to ASTNode A_FUNCTIONDEC
 // POST: MIPS code in fp
 void emit_function(ASTnode * p, FILE *fp){
  char s[100];
  emit(fp, p->name, "", "function definition");
-
+ 
+ fi->functionName = p->name;
+ fi->returnType = p->my_data_type;
+ fi->isReturnStmtFound = 0;
  // Carve out the stack for activation record
  emit(fp, "", "move $a1, $sp", "Activation Record Carve out copy SP");
  sprintf(s,"subi $a1 $a1 %d", p->symbol->offset*WSIZE);
@@ -64,9 +79,25 @@ void emit_function(ASTnode * p, FILE *fp){
  emit(fp, "", s, "Store the old Stack pointer");
  emit(fp, "", "move $sp, $a1", "Make SP the current activation record");
  fprintf(fp, "\n");
- // copy the parameters to the formal from registers $t0 et
+ 
+ // copy the parameters to the formal from registers $t0 and so on
+ // t0 to tn is already loaded by emit_args, need to fetch it and set them into sp+offset
+ emit_params(p->s1, fp, 0);
+
  // generate the compound statement
  EMIT_AST(p->s2, fp);
+ 
+
+ //At this point, after the compound statnemt, if the funciton return type is INT
+ // and no return statement found, should barf
+ // other funciton return type mismatches are covered inside emit_return
+ printf(" --> %d\n", p->my_data_type);
+ printf(" --> %d\n", fi->isReturnStmtFound);
+ if(!fi->isReturnStmtFound && p->my_data_type == A_INTTYPE){
+  printf("BARF: Function %s should return an INT, NO RETURN STMT FOUND\n", p->name);
+  exit(1);
+ }
+ 
  // create an implicit return depending on if we are main or not
 
  // restore RA and SP before we return
@@ -78,14 +109,7 @@ void emit_function(ASTnode * p, FILE *fp){
  emit(fp, "", s, "Return from function store SP");
  fprintf(fp, "\n");
 
- if (strcmp(p->name, "main") == 0){ // exit the system
-  emit(fp, "", "li $v0, 10", "Exit from Main, we are done");
-  emit(fp, "", "syscall", "Exit everything");
-
- }
- else { // jump back to caller
-
- }
+ func_name_wise_code(p->name, fp);
  sprintf(s, "END OF FUNCTION %s",  p->name);
  emit(fp, "", "", s);
  fprintf(fp, "\n");
@@ -96,8 +120,7 @@ void emit_function(ASTnode * p, FILE *fp){
 void emit_var(ASTnode * p, FILE *fp){
  char s[100];
  //Task: handle internal offset if array
- printf("emit_var\n");
- printStructure(p);
+ // printStructure(p);  //debug prints
  if (p->s1 != NULL){  // variable is an array
   emit_expr(p->s1, fp);  // a0 has the expression
   printf("emit_var: index expr calculated\n");
@@ -158,13 +181,60 @@ void emit_write(ASTnode * p, FILE *fp){
  }
 } // end of emit_write
 
+// PRE: PTR to ASTNode A_ARGS
+// POST: MIPS code in fp for arguments processing, return the number of args
+void emit_args(ASTnode * p, FILE *fp){
+ if (p == NULL)  //Arguments could be NULL
+  return;
+ char s[100];
+ // argument expression
+ emit_expr(p->s1, fp);  // a0 holds the output
+ sprintf(s, "sw $a0, %d($sp)", p->symbol->offset * WSIZE);  // Store arg into sp+offset pos
+ emit(fp, "", s, "Store arg into memory offset location");
+
+ emit_args(p->next, fp);  //next argument
+} // end of emit_args
+
+// PRE: PTR to ASTNode A_ARGS
+// POST: MIPS code in fp for arguments to store into temporary varaibles t
+void store_args_into_t(ASTnode * p, FILE *fp, int tempReigsterNumber){
+ if (p == NULL)  //Arguments could be NULL
+  return;
+ char s[100];
+ 
+ // correspondent arguments values are loaded from sp + their offset and set into a0
+ sprintf(s, "lw $a0, %d($sp)", p->symbol->offset * WSIZE);  // load from sp + offset
+ emit(fp, "", s, "Previously stored arg Load into a0");
+
+ sprintf(s, "move $t%d, $a0", tempReigsterNumber);  // Arguments to temp register with proper counter
+ emit(fp, "", s, "Arg to temp");
+
+ tempReigsterNumber++;  // next argument will be in next t register
+ store_args_into_t(p->next, fp, tempReigsterNumber);
+} // end of store_args_into_t
+
+
+// PRE: PTR to ASTNode A_PARAMS
+// POST: MIPS code in fp to fetch the data from t registers and set them into function sp+offset
+void emit_params(ASTnode * p, FILE *fp, int tempReigsterNumber){
+ if (p == NULL)  //Arguments could be NULL
+  return;
+ char s[100];
+ 
+ // correspondent t registers values are stored into sp + their offset
+ sprintf(s, "sw $t%d %d($sp)", tempReigsterNumber, p->symbol->offset * WSIZE);  // load from sp + offset
+ emit(fp, "", s, "Store value from temp registers into funcion sp + offset pos");
+
+ tempReigsterNumber++;  // next argument will be in next t register
+ emit_params(p->next, fp, tempReigsterNumber);
+} // end of emit_params
 
 // PRE: PTR to a family of expressions
 // POST: MIPS code in fp
 // This funciton will write asm code for a expression operation
 void emit_expr(ASTnode * p, FILE *fp){
  char s[100];
- printStructure(p);
+ // printStructure(p);  //debug print to see the structure scenario
  switch (p->type)
  {
  case A_NUM:
@@ -179,7 +249,7 @@ void emit_expr(ASTnode * p, FILE *fp){
   return;
   break;
  case A_EXPR:
-  printf("Expression\n");
+  // printf("Expression\n");
   if(p->operator == A_UNIRY_MINUS){ // handle unary minus case
 
   }
@@ -261,6 +331,15 @@ void emit_expr(ASTnode * p, FILE *fp){
   }
   return;
   break;
+
+  case A_FUNC_CALL:
+   emit_args(p->s1, fp);  // process the argument first before function call
+   // store them into temporary registers t
+   store_args_into_t(p->s1, fp, 0);  // move all args into appropriate temp registers
+   sprintf(s, "jal %s", p->name);  // Now ready to call the function
+   emit(fp, "", s, "Function Call");
+   fprintf(fp, "\n");
+   return;
  
  default:
   printf("emit_expr switch NEVER SHOULD BE HERE\n");
@@ -296,7 +375,7 @@ void emit_while(ASTnode * p, FILE *fp){  // p is not null for sure
  char s[100];
  char loopin[100];
  char loopout[100];
- printf("WHILE ENCHELADA start\n");
+ // printf("WHILE ENCHELADA start\n");
 
  //sprintf(s ,"sw $a0 %d($sp)", p->symbol->offset*WSIZE);
  //emit(fp, "", s, "Assign store RHS temporarily");
@@ -326,7 +405,7 @@ void emit_while(ASTnode * p, FILE *fp){  // p is not null for sure
  sprintf(s, "%s:", loopout);
  fprintf(fp, "%s\t\t#While Loop END\n", s);  // printing directly to maintain indentation
 
- printf("WHILE ENCHELADA end\n");
+ // printf("WHILE ENCHELADA end\n");
 } // end of emit_while
 
 
@@ -356,6 +435,43 @@ void emit_if(ASTnode * p, FILE *fp){  // As the p is A_IF, it is not NULL
  fprintf(fp, "%s\t\t# End of If Scope\n", s);  // printing directly to maintain indentation
 
 } // end of emit_read
+
+
+
+// PRE: PTR to ASTNode A_RETURN_STAT
+// POST: MIPS code to perform return statement
+void emit_return(ASTnode * p, FILE *fp){  // As the p is A_RETURN_STAT box, it is not NULL
+ char s[100];
+ char elsebody[100];
+ char endif[100];
+ 
+ emit(fp, "", "", "Return Statement explicitely mentioned");
+
+ if (p->s1 == NULL){  //return without any expression, return;
+  if (fi->returnType == A_INTTYPE){
+   printf("BURF: Return type mismatch in Function %s!!\n", fi->functionName);
+   exit(1);
+  }
+  fi->isReturnStmtFound = 0;
+  emit(fp, "", "li $a0, 0", "RETURN has no specified value set to 0");
+  emit(fp, "", "lw $ra ($sp)", "restore old environment RA");
+  sprintf(s, "lw $sp %d($sp)",  WSIZE);
+  emit(fp, "", s, "Return from function store SP");
+  fprintf(fp, "\n");
+ } else{  // return has an expression
+   if (fi->returnType != p->s1->my_data_type){
+    printf("BURF: Return type mismatch in Function %s!!\n", fi->functionName);
+    exit(1);
+   }
+   fi->isReturnStmtFound = 1;
+   emit_expr(p->s1, fp);
+
+   emit(fp, "", "lw $ra ($sp)", "Load the old environment RA");
+   emit(fp, "", "lw $sp 4($sp)", "Return from function stack pointer");
+   fprintf(fp, "\n");
+ }
+ func_name_wise_code(fi->functionName, fp);
+} // end of emit_return
 
 
 // PRE: PTR to AST, PTR to FILE
@@ -393,7 +509,7 @@ void EMIT_STRINGS(ASTnode* p, FILE* fp){
 //POST: MIPS code into the file for the tree
 void EMIT_AST(ASTnode* p, FILE* fp){
  if(p == NULL) return;
- printf("%s %d\n", p->name, p->type);
+ // printf("%s %d\n", p->name, p->type);
  switch (p->type) {
   case A_VARDEC: // no real action
    EMIT_AST(p->next, fp);
@@ -437,6 +553,18 @@ void EMIT_AST(ASTnode* p, FILE* fp){
 
   case A_IF:
    emit_if(p, fp);
+   break;
+  
+  case A_EXPR_STAT:  // could be expr; or ;
+   // printStructure(p);
+   if (p->s1 != NULL)  // only call expr if p->s1 has an expression
+    emit_expr(p->s1, fp);
+   EMIT_AST(p->next, fp);  // next statement
+   break;
+  
+  case A_RETURN_STAT:
+   emit_return(p, fp);
+   EMIT_AST(p->next, fp);  // next statement
    break;
 
   default:

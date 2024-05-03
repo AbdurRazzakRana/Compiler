@@ -23,23 +23,23 @@ sort of production rules */
 enum ASTtype
 {
  A_FUNCTION_COMMON, //0
- A_FUNCTIONDEC, //1
+ A_FUNCTIONDEC, //1  // usrd
  A_FUNCTION_PROTO, //2
  A_VARDEC, //3
- A_VARUSE, //4
+ A_VARUSE, //4  // done
  A_COMPOUND, //5
- A_WRITE, //6
- A_PARAMS, //7
- A_NUM, //8
- A_EXPR, //9
- A_EXPR_STAT, //10
- A_WHILE_STAT, //11
- A_IF, //12
- A_IFBODY, //13
- A_READ, //14
+ A_WRITE, //6  // done
+ A_PARAMS, //7 // half done // array left
+ A_NUM, //8  // done
+ A_EXPR, //9  // done
+ A_EXPR_STAT, //10  // done
+ A_WHILE_STAT, //11  //done
+ A_IF, //12  // done
+ A_IFBODY, //13  //done
+ A_READ, //14  //done
  A_FUNC_CALL, //15
- A_ARG, //16
- A_ASSGN_STAT, //17
+ A_ARG, //16  // done
+ A_ASSGN_STAT, //17  //done
  A_RETURN_STAT, //18
  A_BREAK, //19
  A_CONTINUE //20

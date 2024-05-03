@@ -6,9 +6,13 @@ int f (int z){
  write "\n";
  return z + 1;
 }
-int main(void){
+
+void main(void){
  int g;
- g = f(2);
+ int x;
+ x = 5;
+ g=2;
+ g = f(x+2);
  write g;
  write "\nshould have written 3\n";
 }

@@ -43,6 +43,6 @@ void EMIT(ASTnode* p, FILE* fp){
  fprintf(fp, ".text\n\n");
  fprintf(fp, ".globl main\n\n");
 
- 
+ fi = malloc(sizeof(struct FunctionInfo));
  EMIT_AST(p, fp);
 }
