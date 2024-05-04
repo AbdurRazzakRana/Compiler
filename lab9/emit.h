@@ -10,7 +10,10 @@
 #define LOG_WSIZE 2
 
 
-void EMIT_GLOBALS(ASTnode* p, FILE* fp);
-void EMIT(ASTnode* p, FILE* fp);
 void emit(FILE * fp, char* label, char* command, char* comment);
+
+void EMIT(ASTnode* p, FILE* fp);  //Emit the code first called up method
+void EMIT_GLOBALS(ASTnode* p, FILE* fp); // to prints global
+void EMIT_STRINGS(ASTnode* p, FILE* fp); // to prints strings on asm file
+void EMIT_AST(ASTnode* p, FILE* fp); // emit ast on asm file
 // #endif

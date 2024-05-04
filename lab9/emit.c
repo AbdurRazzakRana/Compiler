@@ -32,6 +32,118 @@ void emit(FILE * fp, char* label, char* command, char* comment){
 
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
+void EMIT_GLOBALS(ASTnode* p, FILE* fp){
+//  print_structure(p);
+ if(p == NULL) return;   // return when p is null
+ if (p->type == A_FUNCTION_PROTO 
+  || p->type == A_FUNCTIONDEC){
+   // do nothing when its function dec or prototype,
+   //do not return to show variables afterwords
+  }   
+ else   //its a global varialbe
+  fprintf(fp, "%s: .space %d # global varaible\n", p->name, p->symbol->mysize * WSIZE);
+ EMIT_GLOBALS(p->s1, fp);  // global variables are s1 connected, such as int x,y,z,A[100];
+ EMIT_GLOBALS(p->next, fp);  // same level next functions
+}
+
+// PRE: PTR to the top of AST, PTR to FILE
+// POST: prints out MIPS code into file, prints MIPS based strill into fil
+void EMIT_STRINGS(ASTnode* p, FILE* fp){
+ if(p == NULL) return;
+ if(p->type == A_WRITE && p->name != NULL){
+  p->label = CreateTempLabel();
+  
+  fprintf(fp,"%s: .asciiz    \%s \n", p->label, p->name);
+ }
+ EMIT_STRINGS(p->s1, fp);
+ EMIT_STRINGS(p->s2, fp);
+ EMIT_STRINGS(p->next, fp);
+}
+
+
+//PRE: PTR to ASTnode or NULL
+//POST: MIPS code into the file for the tree
+void EMIT_AST(ASTnode* p, FILE* fp){
+ if(p == NULL) return;
+ // printf("%s %d\n", p->name, p->type);
+ switch (p->type) {
+  case A_VARDEC: // no real action
+   EMIT_AST(p->next, fp);
+   break;
+
+  case A_FUNCTIONDEC:
+   emit_function(p,fp);
+   EMIT_AST(p->next, fp);  // functions are next connected
+   break;
+
+  case A_COMPOUND:  // no action for s1 vardec already in stack size
+   EMIT_AST(p->s2, fp); // statements
+   EMIT_AST(p->next, fp);  // compounds may has next compound
+   break;
+
+  case A_WRITE:  
+   emit_write(p, fp);  // deal with using write helper function
+   EMIT_AST(p->next, fp);  // write is only next connected
+   break;
+
+  case A_EXPR:
+   emit_expr(p, fp);  // helper function to print on asm for expression
+   EMIT_AST(p->s1, fp);  // Additive expression
+   EMIT_AST(p->s2, fp);  // term or simple_expression
+   break;
+
+  case A_READ:
+   emit_read(p, fp);  // helper function to print read
+   EMIT_AST(p->next, fp);  // read is only next connected
+   break;
+
+  case A_ASSGN_STAT:
+   emit_assign(p, fp);
+   EMIT_AST(p->next, fp); // for the same level next assignment
+   break;
+
+  case A_WHILE_STAT:
+   emit_while(p, fp);
+   EMIT_AST(p->next, fp); // while is next connected
+   break;
+
+  case A_IF:
+   emit_if(p, fp);
+   EMIT_AST(p->next, fp); // while is next connected
+   break;
+  
+  case A_EXPR_STAT:  // could be expr; or ;
+   // printStructure(p);
+   if (p->s1 != NULL)  // only call expr if p->s1 has an expression
+    emit_expr(p->s1, fp);
+   EMIT_AST(p->next, fp);  // next statement
+   break;
+  
+  case A_RETURN_STAT:
+   emit_return(p, fp);
+   EMIT_AST(p->next, fp);  // next statement
+   break;
+
+  case A_BREAK:
+   emit_break(p, fp);
+   EMIT_AST(p->next, fp);  // next statement
+   break;
+
+  case A_CONTINUE:
+   emit_continue(p, fp);
+   EMIT_AST(p->next, fp);  // next statement
+   break;
+
+  default:
+   printf("EMIT_AST case %d not implemented\n", p->type);
+   printf("WE SHOULD NEVER BE HERE\n");
+   break;
+ } // end of swtich
+
+}
+
+// PRE: PTR to AST, PTR to FILE
+// POST: prints out MIPS code into file, using helper functions
 void EMIT(ASTnode* p, FILE* fp){
  if (p== NULL) return;
  if (fp == NULL) return;

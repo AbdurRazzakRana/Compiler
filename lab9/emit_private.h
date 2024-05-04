@@ -26,13 +26,33 @@ struct BreakContinueInfo
  char * continueLevel; // keep track of continue label
 };
 
+
+/*
+Example case:
+int f(int A[]){
+ int B[10];
+ B[2]=10;
+ write A[3] + B[2];
+}
+int main(void){
+ int A[5];
+ A[3] = 23;
+ f(A);
+}
+*/
+// For global array we can identify it as p->symbol->level = 0
+// However, we need to differentiate arrays that comes as parameter and locally declared
+// Because locally declared arrays carve out the spaces in memory and they are identifiable by sp + offset
+// However parameter array comes with only one Array pointer
+// We need to access the address first before adding offset
+// This array will store the array names that come through parameter
+char parameterArray[100][100];
+int parameterArrayCounter; // this will keep track how many parameter array received
+
 struct FunctionInfo * fi;  // pointer to FunctionInfo object
 struct BreakContinueInfo * bci;  // pointer to BreakContinueInfo object
 
-char * CreateTempLabel(); // Togenerate new Label for asm file
-void EMIT_GLOBALS(ASTnode* p, FILE* fp); // to prints global
-void EMIT_STRINGS(ASTnode* p, FILE* fp); // to prints strings on asm file
-void EMIT_AST(ASTnode* p, FILE* fp); // emit ast on asm file
+char * CreateTempLabel(); // To generate new Label for asm file
 
 void emit_expr(ASTnode * p, FILE *fp);  // helper function to print expressions in asm file
 void emit_function(ASTnode * p, FILE *fp);  // helper function to print function code in asm
@@ -49,5 +69,5 @@ void emit_return(ASTnode * p, FILE *fp);  // helper function to print the return
 void emit_break(ASTnode * p, FILE *fp);  // helper function to print break asm codes
 void emit_continue(ASTnode * p, FILE *fp);  // helper function to print continue asm codes
 
-void print_structure(ASTnode* p);  // print structure
+void print_structure(ASTnode* p);  // debug print structure to see the full box of current p
 void func_name_wise_code(char * funcName, FILE* fp);  // helper function to print functionname wise code

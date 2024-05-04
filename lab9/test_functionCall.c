@@ -13,6 +13,6 @@ void main(void){
  x = 5;
  g=2;
  g = f(x+2);
+ write "\nshould have written 8\n";
  write g;
- write "\nshould have written 3\n";
 }
