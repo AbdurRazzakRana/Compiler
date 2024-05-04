@@ -86,7 +86,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 58 "lab9.y"
+#line 59 "lab9.y"
 {
 	int value;
 	char * string;

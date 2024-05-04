@@ -1,161 +1,175 @@
 // Author: Abdur Razzak
 // Lab: Lab 9
+// Date: May 3, 2024
 // emit.c implements emit.h
 // Resonpsible to emits the MIPS code
 
-
-#include<string.h>
+#include <string.h>
 #include "ast.h"
 #include "emit_private.h"
 #include "emit.h"
 
 // PRE: possible label, command and comment
 // POST: formatted output the file
-void emit(FILE * fp, char* label, char* command, char* comment){
- if (strcmp("", comment) == 0){
-  if(strcmp("", label) == 0){
-   fprintf(fp, "\t%s\t\t\n", command);
+void emit(FILE *fp, char *label, char *command, char *comment)
+{
+  if (strcmp("", comment) == 0)
+  { // no comment
+    if (strcmp("", label) == 0)
+    { // no label
+      fprintf(fp, "\t%s\t\t\n", command);
+    }
+    else
+    { // has label
+      fprintf(fp, "%s:\t%s\t\t\n", label, command);
+    }
   }
-  else {
-   fprintf(fp, "%s:\t%s\t\t\n", label, command);
+  else
+  { // has comment
+    if (strcmp("", label) == 0)
+    { // no label
+      fprintf(fp, "\t%s\t\t# %s\n", command, comment);
+    }
+    else
+    { // has label
+      fprintf(fp, "%s:\t%s\t\t# %s\n", label, command, comment);
+    }
   }
- }
- else {
-  if(strcmp("", label) == 0){
-   fprintf(fp, "\t%s\t\t# %s\n", command, comment);
-  }
-  else {
-   fprintf(fp, "%s:\t%s\t\t# %s\n", label, command, comment);
-  }
- }
 }
 
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
-void EMIT_GLOBALS(ASTnode* p, FILE* fp){
-//  print_structure(p);
- if(p == NULL) return;   // return when p is null
- if (p->type == A_FUNCTION_PROTO 
-  || p->type == A_FUNCTIONDEC){
-   // do nothing when its function dec or prototype,
-   //do not return to show variables afterwords
-  }   
- else   //its a global varialbe
-  fprintf(fp, "%s: .space %d # global varaible\n", p->name, p->symbol->mysize * WSIZE);
- EMIT_GLOBALS(p->s1, fp);  // global variables are s1 connected, such as int x,y,z,A[100];
- EMIT_GLOBALS(p->next, fp);  // same level next functions
+void EMIT_GLOBALS(ASTnode *p, FILE *fp)
+{
+  //  print_structure(p);
+  if (p == NULL)
+    return; // return when p is null
+  if (p->type == A_FUNCTION_PROTO || p->type == A_FUNCTIONDEC)
+  {
+    // do nothing when its function dec or prototype,
+    // do not return to show variables afterwords
+  }
+  else // its a global varialbe
+    fprintf(fp, "%s: .space %d # global varaible\n", p->name, p->symbol->mysize * WSIZE);
+  EMIT_GLOBALS(p->s1, fp);   // global variables are s1 connected, such as int x,y,z,A[100];
+  EMIT_GLOBALS(p->next, fp); // same level next functions
 }
 
 // PRE: PTR to the top of AST, PTR to FILE
-// POST: prints out MIPS code into file, prints MIPS based strill into fil
-void EMIT_STRINGS(ASTnode* p, FILE* fp){
- if(p == NULL) return;
- if(p->type == A_WRITE && p->name != NULL){
-  p->label = CreateTempLabel();
-  
-  fprintf(fp,"%s: .asciiz    \%s \n", p->label, p->name);
- }
- EMIT_STRINGS(p->s1, fp);
- EMIT_STRINGS(p->s2, fp);
- EMIT_STRINGS(p->next, fp);
+// POST: prints out MIPS code into file, prints MIPS based strings into file
+void EMIT_STRINGS(ASTnode *p, FILE *fp)
+{
+  if (p == NULL)
+    return;
+  if (p->type == A_WRITE && p->name != NULL)
+  { // only for write
+    p->label = CreateTempLabel();
+
+    fprintf(fp, "%s: .asciiz    \%s \n", p->label, p->name); // printing label in data section
+  }
+  EMIT_STRINGS(p->s1, fp);   // left child
+  EMIT_STRINGS(p->s2, fp);   // right child
+  EMIT_STRINGS(p->next, fp); // next child
 }
 
+// PRE: PTR to ASTnode or NULL
+// POST: MIPS code into the file for the tree
+void EMIT_AST(ASTnode *p, FILE *fp)
+{
+  if (p == NULL)
+    return;
+  switch (p->type)
+  {
+  case A_VARDEC: // no real action, only next call
+    EMIT_AST(p->next, fp);
+    break;
 
-//PRE: PTR to ASTnode or NULL
-//POST: MIPS code into the file for the tree
-void EMIT_AST(ASTnode* p, FILE* fp){
- if(p == NULL) return;
- // printf("%s %d\n", p->name, p->type);
- switch (p->type) {
-  case A_VARDEC: // no real action
-   EMIT_AST(p->next, fp);
-   break;
+  case A_FUNCTIONDEC:      // function declaration
+    emit_function(p, fp);  // emit mips code
+    EMIT_AST(p->next, fp); // functions are next connected
+    break;
 
-  case A_FUNCTIONDEC:
-   emit_function(p,fp);
-   EMIT_AST(p->next, fp);  // functions are next connected
-   break;
+  case A_COMPOUND:         // no action for s1 vardec already in stack size
+    EMIT_AST(p->s2, fp);   // statements
+    EMIT_AST(p->next, fp); // compounds may has next compound
+    break;
 
-  case A_COMPOUND:  // no action for s1 vardec already in stack size
-   EMIT_AST(p->s2, fp); // statements
-   EMIT_AST(p->next, fp);  // compounds may has next compound
-   break;
-
-  case A_WRITE:  
-   emit_write(p, fp);  // deal with using write helper function
-   EMIT_AST(p->next, fp);  // write is only next connected
-   break;
+  case A_WRITE:
+    emit_write(p, fp);     // deal with using write helper function
+    EMIT_AST(p->next, fp); // write is only next connected
+    break;
 
   case A_EXPR:
-   emit_expr(p, fp);  // helper function to print on asm for expression
-   EMIT_AST(p->s1, fp);  // Additive expression
-   EMIT_AST(p->s2, fp);  // term or simple_expression
-   break;
+    emit_expr(p, fp);    // helper function to print on asm for expression
+    EMIT_AST(p->s1, fp); // Additive expression
+    EMIT_AST(p->s2, fp); // term or simple_expression
+    break;
 
   case A_READ:
-   emit_read(p, fp);  // helper function to print read
-   EMIT_AST(p->next, fp);  // read is only next connected
-   break;
+    emit_read(p, fp);      // helper function to print read
+    EMIT_AST(p->next, fp); // read is only next connected
+    break;
 
-  case A_ASSGN_STAT:
-   emit_assign(p, fp);
-   EMIT_AST(p->next, fp); // for the same level next assignment
-   break;
+  case A_ASSGN_STAT:       // assignment statement
+    emit_assign(p, fp);    // generate mips code
+    EMIT_AST(p->next, fp); // for the same level next assignment
+    break;
 
-  case A_WHILE_STAT:
-   emit_while(p, fp);
-   EMIT_AST(p->next, fp); // while is next connected
-   break;
+  case A_WHILE_STAT:       // while statement
+    emit_while(p, fp);     // generate code
+    EMIT_AST(p->next, fp); // while is next connected
+    break;
 
-  case A_IF:
-   emit_if(p, fp);
-   EMIT_AST(p->next, fp); // while is next connected
-   break;
-  
-  case A_EXPR_STAT:  // could be expr; or ;
-   // printStructure(p);
-   if (p->s1 != NULL)  // only call expr if p->s1 has an expression
-    emit_expr(p->s1, fp);
-   EMIT_AST(p->next, fp);  // next statement
-   break;
-  
-  case A_RETURN_STAT:
-   emit_return(p, fp);
-   EMIT_AST(p->next, fp);  // next statement
-   break;
+  case A_IF:               // if else node
+    emit_if(p, fp);        // gen mips code
+    EMIT_AST(p->next, fp); // while is next connected
+    break;
 
-  case A_BREAK:
-   emit_break(p, fp);
-   EMIT_AST(p->next, fp);  // next statement
-   break;
+  case A_EXPR_STAT:         // could be expr; or ;
+    if (p->s1 != NULL)      // only call expr if p->s1 has an expression
+      emit_expr(p->s1, fp); // gen mips code
+    EMIT_AST(p->next, fp);  // next statement
+    break;
 
-  case A_CONTINUE:
-   emit_continue(p, fp);
-   EMIT_AST(p->next, fp);  // next statement
-   break;
+  case A_RETURN_STAT:      // return statement
+    emit_return(p, fp);    // gen mips code
+    EMIT_AST(p->next, fp); // next statement
+    break;
+
+  case A_BREAK:            // break statement
+    emit_break(p, fp);     // gen mips code
+    EMIT_AST(p->next, fp); // next statement
+    break;
+
+  case A_CONTINUE:         // continue statement
+    emit_continue(p, fp);  // to emit mips code
+    EMIT_AST(p->next, fp); // next statement
+    break;
 
   default:
-   printf("EMIT_AST case %d not implemented\n", p->type);
-   printf("WE SHOULD NEVER BE HERE\n");
-   break;
- } // end of swtich
-
+    printf("EMIT_AST case %d not implemented\n", p->type);
+    printf("WE SHOULD NEVER BE HERE\n");
+    break;
+  } // end of swtich
 }
 
 // PRE: PTR to AST, PTR to FILE
 // POST: prints out MIPS code into file, using helper functions
-void EMIT(ASTnode* p, FILE* fp){
- if (p== NULL) return;
- if (fp == NULL) return;
- fprintf(fp, "# MIPS CODE GENERATED BY Compliler Class\n\n");
- fprintf(fp, ".data\n");
- EMIT_STRINGS(p,fp);
- fprintf(fp, "\n.align 2\n");
- EMIT_GLOBALS(p, fp);
- fprintf(fp, ".text\n\n");
- fprintf(fp, ".globl main\n\n");
+void EMIT(ASTnode *p, FILE *fp)
+{
+  if (p == NULL)
+    return;
+  if (fp == NULL)
+    return;
+  fprintf(fp, "# MIPS CODE GENERATED BY Compliler Class\n\n");
+  fprintf(fp, ".data\n"); // data section
+  EMIT_STRINGS(p, fp);    // will hold labels
+  fprintf(fp, "\n.align 2\n");
+  EMIT_GLOBALS(p, fp); // will print global variables
+  fprintf(fp, ".text\n\n");
+  fprintf(fp, ".globl main\n\n"); // defining main ans staring function
 
- fi = malloc(sizeof(struct FunctionInfo));
- bci = malloc(sizeof(struct BreakContinueInfo));
- EMIT_AST(p, fp);
+  fi = malloc(sizeof(struct FunctionInfo));       // for keeping current function name, creating obj
+  bci = malloc(sizeof(struct BreakContinueInfo)); // for break  continue markup
+  EMIT_AST(p, fp);                                // generate full mips code
 }

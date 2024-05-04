@@ -1,18 +1,19 @@
 %{
 /*
 	Author: Abdur Razzak
-	Date: April 20, 2024
+	Date: May 3, 2024
 	Lab: Lab 9
-	Modifications:
-		Added Level counters
-		implemented data type and sub data type
-		added support for parameters type chekcing
-		array can be sent as function parameter
-		fucntion prototype is supported
-		tid's are searched for prior occurances before inserting 		 
+	Input: This file will take tokens as input from lex file
+	Output: Will apply Grammer based on token sequence and rule for syntax directed semantics
 
-		Input: This file will take tokens as input
-		Output: Will apply Grammer based on token sequence
+ Modifications:
+		Fixes from Lab 7 submission comments:
+			1. function parameter matching at function call
+			2. correct implementation of unary minus
+			3. fixed segmentation falut for function prototying before
+				and function is implemented after the call
+			4. Proper array passing
+			5. Addition checking between scaller and array subtype
 */
 
 
